@@ -1,4 +1,5 @@
 import { newEl, value, signal, onEvent, computed } from "../src";
+import peek from "../src/core/peek";
 import { UseInstruction } from "../src/dom/computed/computed";
 import hydrate from "../src/dom/hydrate";
 
@@ -8,7 +9,7 @@ const testButton = newEl(
     {
         onEvents: {
             exampleEvent: onEvent("click", (element, event) => {
-                testValue.set(testValue.get() === "test" ? "clicked" : "test");
+                testValue.set(peek(hydrateValue) === "test" ? "clicked" : "test");
             })
         },
 
@@ -23,7 +24,7 @@ const testButton = newEl(
 const hydrateValue = value("HYDRATED TEXT: WAITING 5 SECONDS BEFORE REACTIE STATE CHANGE");
 const hydrateText = document.createElement("p");
 document.body.appendChild(hydrateText);
-hydrateText.innerText = hydrateValue.get();
+hydrateText.innerText = peek(hydrateValue);
 
 hydrate(hydrateText, {
     innerText: computed((use: UseInstruction<string>) => {

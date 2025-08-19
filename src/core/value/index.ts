@@ -12,11 +12,12 @@ export default (initialValue: any) => {
     const changedSignal = signal();
 
     return {
-        get: () => currentValue,
         set: (value: any) => {
             currentValue = value;
             changedSignal.fire(currentValue);
         },
         getChangedSignal: () => changedSignal,
+        _PRIVATE_DANGEROUS_get: () => currentValue,
+        _PRIVATE_DANGEROUS_isState: true,
     } as ValueReturnCallback<typeof initialValue>;
 }

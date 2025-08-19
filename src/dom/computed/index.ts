@@ -8,6 +8,7 @@ import { ComputedCallback, ComputedCleanup, ComputedReturn, UseInstruction } fro
 import { Connection } from "../../core/signal/signal";
 import { processProperty } from "../new";
 import remoteRemove from "../../remoteRemove";
+import peek from "../../core/peek";
 
 const handleComputedRenderCallback = async (callback: ComputedCallback<any>, use: UseInstruction<any>, element: HTMLElement, property: string) => {
     const result = await callback(use);
@@ -23,7 +24,7 @@ export default (callback: ComputedCallback<any>, cleanupCallback?: ComputedClean
                 handleComputedRenderCallback(callback, use, element, property);
             });
 
-            return fusionValue.get();
+            return peek(fusionValue);
         };
 
         remoteRemove(element);
