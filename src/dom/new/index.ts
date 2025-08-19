@@ -9,7 +9,11 @@ import { EventListenerCallback } from "../../core/onEvent/onEvent";
 import { ComputedFactoryCallback, EventCleanupCallbacks } from "./new";
 import remoteRemove from "../../remoteRemove";
 
-const processOnEvents = (value: Record<string, EventListenerCallback>, eventCleanupCallbacks: EventCleanupCallbacks, newElement: HTMLElement) => {
+const processOnEvents = (
+    value: Record<string, EventListenerCallback>,
+    eventCleanupCallbacks: EventCleanupCallbacks,
+    newElement: HTMLElement
+) => {
     Object.entries(value).forEach(([eventName, eventListener]) => {
         const cleanup = eventListener(newElement);
         if (cleanup) {
@@ -17,7 +21,7 @@ const processOnEvents = (value: Record<string, EventListenerCallback>, eventClea
             eventCleanupCallbacks[eventName].push(cleanup);
         }
     });
-}
+};
 
 const processParent = (value: HTMLElement | null, newElement: HTMLElement) => {
     if (value instanceof HTMLElement) {
@@ -25,44 +29,71 @@ const processParent = (value: HTMLElement | null, newElement: HTMLElement) => {
     }
 };
 
-export const processProperty = (key: string, newElement: HTMLElement, value: any) => { // any type cuz who's there to stop me
+export const processProperty = (key: string, newElement: HTMLElement, value: any) => {
     if (key in newElement) {
         (newElement as any)[key] = value;
     } else {
         newElement.setAttribute(key, value as string);
     }
-}
+};
 
-const processComputed = (key: string, newElement: HTMLElement, computedFactoryCallback: ComputedFactoryCallback): (() => void) => {
+const processComputed = (
+    key: string,
+    newElement: HTMLElement,
+    computedFactoryCallback: ComputedFactoryCallback
+): (() => void) => {
     const info = computedFactoryCallback(key, newElement);
     return info.cleanup;
-}
+};
 
-export default (elementClass: string, elementProperties: HTMLAttributes) => {
+export type PropertyHandler = (
+    key: string,
+    value: any,
+    element: HTMLElement,
+    context: {
+        eventCleanupCallbacks: EventCleanupCallbacks,
+        computedCleanupCallbacks: { [key: string]: () => void }
+    }
+) => void;
+
+export const propertyHandlers: Record<string, PropertyHandler> = {
+    onEvents: (key, value, element, ctx) => {
+        processOnEvents(value, ctx.eventCleanupCallbacks, element);
+    },
+    parent: (key, value, element) => {
+        processParent(value, element);
+    },
+    class: (key, value, element) => {
+        element.classList.add(value as string);
+    },
+    default: (key, value, element) => {
+        processProperty(key, element, value);
+    },
+    computed: (key, value, element, ctx) => {
+        const cleanup = processComputed(key, element, value as ComputedFactoryCallback);
+        if (cleanup) {
+            ctx.computedCleanupCallbacks[key] = cleanup;
+        }
+    }
+};
+
+export const newEl = (elementClass: string, elementProperties: HTMLAttributes) => {
     const newElement = document.createElement(elementClass);
     const eventCleanupCallbacks = {} as EventCleanupCallbacks;
     const computedCleanupCallbacks = {} as { [key: string]: () => void };
 
     Object.entries(elementProperties).forEach(([key, value]) => {
+        let handler: PropertyHandler;
+
         if (typeof value === "function") {
-            // idk lets just guess its a computed
-            const cleanup = processComputed(key, newElement, value as ComputedFactoryCallback);
-            if (cleanup) {
-                computedCleanupCallbacks[key] = cleanup;
-            }
-
-            return;
-        }
-
-        if (key == "onEvents") {
-            processOnEvents(value, eventCleanupCallbacks, newElement);
-        } else if (key == "parent") {
-            processParent(value, newElement);
-        } else if (key == "class") {
-            newElement.classList.add(value as string);
+            handler = propertyHandlers.computed;
+        } else if (key in propertyHandlers) {
+            handler = propertyHandlers[key];
         } else {
-            processProperty(key, newElement, value);
+            handler = propertyHandlers.default;
         }
+
+        handler(key, value, newElement, { eventCleanupCallbacks, computedCleanupCallbacks });
     });
 
     remoteRemove(newElement);
@@ -73,4 +104,24 @@ export default (elementClass: string, elementProperties: HTMLAttributes) => {
     });
 
     return newElement;
-}
+};
+
+export const applyProperty = (
+    element: HTMLElement,
+    key: string,
+    value: any,
+    eventCleanupCallbacks: EventCleanupCallbacks = {},
+    computedCleanupCallbacks: { [key: string]: () => void } = {}
+) => {
+    let handler: PropertyHandler;
+
+    if (typeof value === "function") {
+        handler = propertyHandlers.computed;
+    } else if (key in propertyHandlers) {
+        handler = propertyHandlers[key];
+    } else {
+        handler = propertyHandlers.default;
+    }
+
+    handler(key, value, element, { eventCleanupCallbacks, computedCleanupCallbacks });
+};

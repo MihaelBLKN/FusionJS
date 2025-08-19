@@ -1,5 +1,6 @@
 import { newEl, value, signal, onEvent, computed } from "../src";
 import { UseInstruction } from "../src/dom/computed/computed";
+import hydrate from "../src/dom/hydrate";
 
 const testValue = value("test");
 const testButton = newEl(
@@ -18,3 +19,18 @@ const testButton = newEl(
         parent: document.body,
     }
 );
+
+const hydrateValue = value("HYDRATED TEXT: WAITING 5 SECONDS BEFORE REACTIE STATE CHANGE");
+const hydrateText = document.createElement("p");
+document.body.appendChild(hydrateText);
+hydrateText.innerText = hydrateValue.get();
+
+hydrate(hydrateText, {
+    innerText: computed((use: UseInstruction<string>) => {
+        return use(hydrateValue)
+    })
+});
+
+setTimeout(() => {
+    hydrateValue.set("HYDRATED TEXT: REACTIVE STATE CHANGE");
+}, 5000);
