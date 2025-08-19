@@ -40,3 +40,22 @@ setTimeout(() => {
     disconnect();
     hydrateValue.set("TEST DISCONNECTING");
 }, 5000);
+
+
+newEl("div", {
+    children: [
+        newEl("p", {
+            innerText: "This is a child paragraph."
+        }),
+        newEl("button", {
+            innerText: "Click me",
+            onEvents: {
+                click: onEvent("click", (element, event) => {
+                    console.log("Button clicked!");
+                })
+            }
+        })
+    ],
+
+    parent: document.body
+})

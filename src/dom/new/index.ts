@@ -74,6 +74,15 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
         if (cleanup) {
             ctx.computedCleanupCallbacks[key] = cleanup;
         }
+    },
+    children: (key, value, element, ctx) => {
+        if (Array.isArray(value)) {
+            value.forEach(child => {
+                if (child instanceof HTMLElement) {
+                    element.appendChild(child);
+                }
+            });
+        }
     }
 };
 

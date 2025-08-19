@@ -10,5 +10,6 @@ interface HTMLAttributes {
     htmlProperties?: HTMLProperties;
     parent?: HTMLElement;
     onEvents?: CleanupFunctionMap;
+    children?: HTMLElement[];
     [key: string]: any; // any cuz who's there to stop me?
 }
