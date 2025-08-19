@@ -7,6 +7,7 @@
 import { HTMLAttributes } from "../../global";
 import { EventListenerCallback } from "../../core/onEvent/onEvent";
 import { ComputedFactoryCallback, EventCleanupCallbacks } from "./new";
+import remoteRemove from "../../remoteRemove";
 
 const processOnEvents = (value: Record<string, EventListenerCallback>, eventCleanupCallbacks: EventCleanupCallbacks, newElement: HTMLElement) => {
     Object.entries(value).forEach(([eventName, eventListener]) => {
@@ -64,6 +65,7 @@ export default (elementClass: string, elementProperties: HTMLAttributes) => {
         }
     });
 
+    remoteRemove(newElement);
     newElement.addEventListener("remove", () => {
         Object.values(eventCleanupCallbacks).forEach(cleanupCallbacks => {
             cleanupCallbacks.forEach(cleanup => cleanup());
