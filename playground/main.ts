@@ -1,7 +1,5 @@
-import { newEl, value, signal, onEvent, computed } from "../src";
-import peek from "../src/core/peek";
+import { newEl, value, signal, onEvent, computed, peek, hydrate, observer } from "../src";
 import { UseInstruction } from "../src/dom/computed/computed";
-import hydrate from "../src/dom/hydrate";
 
 const testValue = value("test");
 const testButton = newEl(
@@ -9,7 +7,7 @@ const testButton = newEl(
     {
         onEvents: {
             exampleEvent: onEvent("click", (element, event) => {
-                testValue.set(peek(hydrateValue) === "test" ? "clicked" : "test");
+                testValue.set(peek(testValue) === "test" ? "clicked" : "test");
             })
         },
 
@@ -21,7 +19,7 @@ const testButton = newEl(
     }
 );
 
-const hydrateValue = value("HYDRATED TEXT: WAITING 5 SECONDS BEFORE REACTIE STATE CHANGE");
+const hydrateValue = value("HYDRATED TEXT: WAITING 5 SECONDS BEFORE REACTIVE STATE CHANGE");
 const hydrateText = document.createElement("p");
 document.body.appendChild(hydrateText);
 hydrateText.innerText = peek(hydrateValue);
@@ -32,6 +30,13 @@ hydrate(hydrateText, {
     })
 });
 
+const hydrateObserver = observer(hydrateValue);
+const disconnect = hydrateObserver.onChange((newValue: string) => {
+    console.log("Hydrate value changed:", newValue);
+});
+
 setTimeout(() => {
     hydrateValue.set("HYDRATED TEXT: REACTIVE STATE CHANGE");
+    disconnect();
+    hydrateValue.set("TEST DISCONNECTING");
 }, 5000);
