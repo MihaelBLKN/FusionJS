@@ -1,0 +1,23 @@
+{
+  "name": "fusionjs",
+  "version": "1.0.0",
+  "description": "FusionJs is a port of the Fusion roblox UI framework for the world wide web.",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Fusion",
+    "FusionJs",
+    "Fus",
+    "Fusio",
+    "Roblox",
+    "Roblox"
+  ],
+  "author": "MihaelBLKN",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
