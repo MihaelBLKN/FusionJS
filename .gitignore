@@ -1,2 +1,4 @@
 dist
 node_modules
+playground/node_modules
+playground/dist
