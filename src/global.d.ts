@@ -1,5 +1,5 @@
 import { CleanupOnEventReturnFunction } from "./core/onEvent/onEvent";
-import { Compu } from "./dom/computed/computed";
+import { Compu, ComputedFactoryFunction, ComputedReturn } from "./dom/computed/computed";
 
 interface CSSRGBData {
     r?: number,
@@ -16,7 +16,7 @@ type CSSHexData = {
     alpha?: number,
 }
 
-type CSSProperties = Partial<Record<keyof CSSStyleDeclaration, string | number | CSSRGBData | CSSHexData>>;
+type CSSProperties = Partial<Record<keyof CSSStyleDeclaration, string | number | CSSRGBData | CSSHexData | ComputedFactoryFunction>>;
 type CleanupFunctionMap = { [key: string]: CleanupOnEventReturnFunction };
 interface HTMLAttributes {
     id?: string;
@@ -24,6 +24,6 @@ interface HTMLAttributes {
     style?: CSSProperties;
     parent?: HTMLElement;
     onEvents?: CleanupFunctionMap;
-    children?: HTMLElement[] | ((property: string, element: HTMLElement) => ComputedReturn);
+    children?: HTMLElement[] | ComputedFactoryFunction;
     [key: string]: any; // any cuz who's there to stop me?
 }

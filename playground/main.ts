@@ -16,12 +16,13 @@ const testButton = newEl(
         },
 
         style: {
-            color: {
-                r: 255,
-                g: 0,
-                b: 0,
-            },
-
+            color: computed(async (use) => {
+                return {
+                    r: await use(testValue) === "clicked" ? 0 : 255,
+                    g: 0,
+                    b: 0,
+                };
+            }),
         },
 
         innerText: computed((use: UseInstruction<string>) => {

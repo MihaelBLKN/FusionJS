@@ -9,6 +9,7 @@ import { Connection } from "../../core/signal/signal";
 import { processProperty } from "../new";
 import remoteRemove from "../../remoteRemove";
 import peek from "../../core/peek";
+import { ComputedFactoryCallback } from "../new/new";
 
 const handleComputedRenderCallback = async (callback: ComputedCallback<any>, use: UseInstruction<any>, element: HTMLElement, property: string) => {
     const result = await (callback as (use: UseInstruction<any>) => any)(use);
@@ -21,7 +22,7 @@ const handleComputedRenderCallback = async (callback: ComputedCallback<any>, use
     return result;
 }
 
-export default (callback: ComputedCallback<any>, cleanupCallback?: ComputedCleanup) => {
+export default (callback: ComputedCallback<any>, cleanupCallback?: ComputedCleanup): ComputedFactoryCallback => {
     return (property: string, element: HTMLElement): ComputedReturn => {
         const connections = new Map<any, Connection>();
         let onUpdateCallback: (value: any) => void;
@@ -45,8 +46,8 @@ export default (callback: ComputedCallback<any>, cleanupCallback?: ComputedClean
                 cleanupCallback && cleanupCallback();
             },
 
-            __callback: () => {
-                return handleComputedRenderCallback(callback, use, element, property);
+            __callback: async () => {
+                return await handleComputedRenderCallback(callback, use, element, property);
             },
 
             setOnUpdateCallback: (callback: (newValue: any) => void) => {

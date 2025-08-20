@@ -86,6 +86,18 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
     },
     style: (key, value, element) => {
         Object.entries(value).forEach(([prop, val]) => {
+            if (typeof val === "function" && val.length > 0) {
+                const computedInstance = val(prop, element);
+
+                computedInstance.setOnUpdateCallback((newValue: any) => {
+                    processStyleValue(prop, newValue, element);
+                });
+            } else {
+                processStyleValue(prop, val, element);
+            }
+        });
+
+        function processStyleValue(prop: string, val: any, element: HTMLElement) {
             if (
                 val &&
                 typeof val === "object" &&
@@ -146,7 +158,7 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
             else {
                 element.style.setProperty(prop, val as string);
             }
-        });
+        }
     },
     default: (key, value, element) => {
         processProperty(key, element, value);
