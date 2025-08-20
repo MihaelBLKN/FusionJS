@@ -42,8 +42,17 @@ setTimeout(() => {
 }, 5000);
 
 
+const computedValue = value([]);
 newEl("div", {
-    children: [
+    children: computed((use: UseInstruction<HTMLElement[]>) => {
+        return use(computedValue);
+    }),
+
+    parent: document.body
+})
+
+setTimeout(() => {
+    computedValue.set([
         newEl("p", {
             innerText: "This is a child paragraph."
         }),
@@ -55,7 +64,5 @@ newEl("div", {
                 })
             }
         })
-    ],
-
-    parent: document.body
-})
+    ])
+}, 5000)

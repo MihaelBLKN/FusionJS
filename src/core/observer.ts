@@ -14,8 +14,13 @@ export default (
     let changedSignal = value.getChangedSignal();
 
     return {
-        onChange: (callback: (newValue: any) => void): (() => void) => {
-            signalConnection = signalConnection ? signalConnection : changedSignal.connect(callback);
+        onChange: (callback: (newValue: any) => void): () => void => {
+            if (!signalConnection) {
+                const connectionPromise = changedSignal.connect(callback);
+                connectionPromise.then(connection => {
+                    signalConnection = connection;
+                });
+            }
 
             return () => {
                 if (signalConnection) {

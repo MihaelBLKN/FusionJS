@@ -7,7 +7,7 @@ export interface Connection {
 }
 
 export interface Signal<T, U = undefined> {
-    connect: (callback: Callback) => Connection;
+    connect: (callback: Callback) => Promise<Connection>;
     disconnectAll: () => void;
     fire: (value: T | U) => void;
 }

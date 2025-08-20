@@ -8,6 +8,7 @@ import { HTMLAttributes } from "../../global";
 import { EventListenerCallback } from "../../core/onEvent/onEvent";
 import { ComputedFactoryCallback, EventCleanupCallbacks } from "./new";
 import remoteRemove from "../../remoteRemove";
+import { ComputedReturn } from "../computed/computed";
 
 const processOnEvents = (
     value: Record<string, EventListenerCallback>,
@@ -30,6 +31,10 @@ const processParent = (value: HTMLElement | null, newElement: HTMLElement) => {
 };
 
 export const processProperty = (key: string, newElement: HTMLElement, value: any) => {
+    if (key === undefined || newElement === undefined) {
+        return
+    }
+
     if (key in newElement) {
         (newElement as any)[key] = value;
     } else {
@@ -56,6 +61,19 @@ export type PropertyHandler = (
     }
 ) => void;
 
+const handleComputedWithCleanupReturn = (
+    key: string,
+    element: HTMLElement,
+    value: any,
+    ctx: { eventCleanupCallbacks: EventCleanupCallbacks, computedCleanupCallbacks: { [key: string]: () => void } }) => {
+    const cleanup = processComputed(key, element, value as ComputedFactoryCallback);
+    if (cleanup) {
+        ctx.computedCleanupCallbacks[key] = cleanup;
+    }
+
+    return cleanup
+}
+
 export const propertyHandlers: Record<string, PropertyHandler> = {
     onEvents: (key, value, element, ctx) => {
         processOnEvents(value, ctx.eventCleanupCallbacks, element);
@@ -70,18 +88,93 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
         processProperty(key, element, value);
     },
     computed: (key, value, element, ctx) => {
-        const cleanup = processComputed(key, element, value as ComputedFactoryCallback);
-        if (cleanup) {
-            ctx.computedCleanupCallbacks[key] = cleanup;
-        }
+        handleComputedWithCleanupReturn(key, element, value, ctx);
     },
-    children: (key, value, element, ctx) => {
-        if (Array.isArray(value)) {
-            value.forEach(child => {
-                if (child instanceof HTMLElement) {
-                    element.appendChild(child);
-                }
+    children: async (key, value, element, ctx) => {
+        let currentChildren: HTMLElement[] = [];
+        let lastValue: unknown;
+
+        const appendChildren = async (children: unknown) => {
+            if (children === lastValue) return;
+            lastValue = children;
+
+            currentChildren.forEach(c => {
+                if (c.parentElement === element) element.removeChild(c);
             });
+            currentChildren = [];
+
+            if (children == null) return;
+
+            if (children instanceof Promise) {
+                children = await children;
+            }
+
+            if (typeof children === "object" && (children as ComputedReturn).__callback) {
+                const result = await (children as ComputedReturn).__callback();
+                if (result && result instanceof HTMLElement) {
+                    element.appendChild(result);
+                } else if (Array.isArray(result)) {
+                    result.forEach(child => {
+                        if (!(child instanceof HTMLElement)) {
+                            throw new Error(
+                                `Invalid child: expected HTMLElement, got ${typeof child}`
+                            );
+                        }
+                        element.appendChild(child);
+                        currentChildren.push(child);
+                    });
+                }
+
+                return
+            }
+
+            if (children instanceof HTMLElement) {
+                element.appendChild(children);
+                currentChildren.push(children);
+            } else if (Array.isArray(children)) {
+                children.forEach(child => {
+                    if (!(child instanceof HTMLElement)) {
+                        throw new Error(
+                            `Invalid child: expected HTMLElement, got ${typeof child}`
+                        );
+                    }
+                    element.appendChild(child);
+                    currentChildren.push(child);
+                });
+            } else if (typeof children === "function") {
+                appendChildren(children());
+            } else {
+                throw new Error(
+                    `Invalid children property: must be HTMLElement, HTMLElement[], function, or null/undefined`
+                );
+            }
+        };
+
+        if (value instanceof HTMLElement || Array.isArray(value) || value == null) {
+            appendChildren(value);
+        } else if (typeof value === "function") {
+            const cleanup = handleComputedWithCleanupReturn(key, element, value, ctx);
+            value = await value();
+
+            const originalCallback = value.__callback;
+            value.__callback = () => {
+                const result = originalCallback();
+
+                value.setOnUpdateCallback((newValue: any) => {
+                    appendChildren(newValue);
+                });
+
+                appendChildren(result);
+                return result;
+            };
+
+            value.__callback();
+            if (cleanup) ctx.computedCleanupCallbacks[key] = cleanup;
+
+        } else {
+            throw new Error(
+                `Invalid children property: must be HTMLElement, HTMLElement[], computed, or null/undefined`
+            );
         }
     }
 };
@@ -100,6 +193,10 @@ export const newEl = (elementClass: string, elementProperties: HTMLAttributes) =
             handler = propertyHandlers[key];
         } else {
             handler = propertyHandlers.default;
+        }
+
+        if (key == "children") {
+            handler = propertyHandlers.children;
         }
 
         handler(key, value, newElement, { eventCleanupCallbacks, computedCleanupCallbacks });

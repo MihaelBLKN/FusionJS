@@ -20,7 +20,7 @@ export default (): Signal<any> => {
     const signalId = generateRandomSequence(4)[0];
 
     return {
-        connect: (callback) => {
+        connect: async (callback) => {
             const connection: Connection = {
                 disconnect: () => {
                     const signalConnections = connections[signalId];
