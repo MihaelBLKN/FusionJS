@@ -6,16 +6,19 @@
 //> -------------------------------- <//
 import { Connection } from "./signal/signal"
 import { ValueReturnCallback } from "./value/value"
+import { Scope } from "../dom/scope/scope"
 
+export interface ObserverReturn { onChange: (callback: (newValue: any) => void) => () => void }
 export default (
-    value: ValueReturnCallback<any>
-): { onChange: (callback: (newValue: any) => void) => () => void } => {
+    value: ValueReturnCallback<any>,
+    scope: Scope
+): ObserverReturn => {
     let signalConnection: Connection
     let changedSignal = value.getChangedSignal();
 
     return {
         onChange: (callback: (newValue: any) => void): () => void => {
-            if (!signalConnection) {
+            if (!signalConnection && changedSignal) {
                 const connectionPromise = changedSignal.connect(callback);
                 connectionPromise.then(connection => {
                     signalConnection = connection;

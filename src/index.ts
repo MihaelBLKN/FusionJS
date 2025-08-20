@@ -4,14 +4,11 @@
 //> MIT License (usage without warranty)
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
-import { newEl } from "./dom/new";
 import signal from "./core/signal";
-import value from "./core/value";
-import { onEvent } from "./core/onEvent";
-import computed from "./dom/computed";
-import observer from "./core/observer";
 import peek from "./core/peek";
 import hydrate from "./dom/hydrate";
-import onChange from "./core/onChange";
+import scope from "./dom/scope";
+import scoped from "./dom/scoped";
+const doNothing = () => { };
 
-export { newEl, signal, value, onEvent, computed, observer, peek, hydrate, onChange };
+export { signal, peek, hydrate, scope, scoped, doNothing };

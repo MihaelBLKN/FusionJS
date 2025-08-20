@@ -4,10 +4,15 @@
 //> MIT License (usage without warranty)
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
+import { Scope } from "../dom/scope/scope";
+
 export default (property: string, callback: (newValue: any) => void) => {
-    return (element: HTMLElement) => {
+    return (element: HTMLElement, scope: Scope) => {
         let previousValue = (element as any)[property];
         const observers: (() => void)[] = [];
+        const deconstructorsScope = scope.getDeconstructors();
+        const onEventDeconstructors = deconstructorsScope.onEvent;
+        let onEventDeconstructorAmount = onEventDeconstructors.size;
 
         const mutationObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -90,8 +95,14 @@ export default (property: string, callback: (newValue: any) => void) => {
             console.warn(`Could not set up property descriptor for "${property}":`, error);
         }
 
-        return () => {
+        const cleanupFunc = () => {
             observers.forEach(cleanup => cleanup());
         }
+
+        onEventDeconstructorAmount = onEventDeconstructors.size;
+        onEventDeconstructorAmount++;
+        onEventDeconstructors.set(onEventDeconstructorAmount, cleanupFunc);
+
+        return cleanupFunc;
     }
 }

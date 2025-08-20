@@ -1,3 +1,5 @@
+import { Scope } from "../../dom/scope/scope"
+
 export type CallbackOnEvent = (element: HTMLElement, event: Event) => void
 export type CleanupFunctionListener = () => void
-export type EventListenerCallback = ((element: HTMLElement) => CleanupFunctionListener)
+export type EventListenerCallback = ((element: HTMLElement, scope: Scope) => CleanupFunctionListener)

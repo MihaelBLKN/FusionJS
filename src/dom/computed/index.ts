@@ -10,6 +10,7 @@ import { processProperty } from "../new";
 import remoteRemove from "../../remoteRemove";
 import peek from "../../core/peek";
 import { ComputedFactoryCallback } from "../new/new";
+import { Scope } from "../scope/scope";
 
 const handleComputedRenderCallback = async (callback: ComputedCallback<any>, use: UseInstruction<any>, element: HTMLElement, property: string) => {
     const result = await (callback as (use: UseInstruction<any>) => any)(use);
@@ -22,18 +23,26 @@ const handleComputedRenderCallback = async (callback: ComputedCallback<any>, use
     return result;
 }
 
-export default (callback: ComputedCallback<any>, cleanupCallback?: ComputedCleanup): ComputedFactoryCallback => {
+export default (callback: ComputedCallback<any>, cleanupCallback: ComputedCleanup, scope: Scope): ComputedFactoryCallback => {
     return (property: string, element: HTMLElement): ComputedReturn => {
         const connections = new Map<any, Connection>();
         let onUpdateCallback: (value: any) => void;
+        const deconstructorsScope = scope.getDeconstructors();
+        const computedDeconstructors = deconstructorsScope.computed;
+        let computedDeconstructorsAmount = computedDeconstructors.size;
 
         const use: UseInstruction<any> = async (fusionValue) => {
             if (!connections.has(fusionValue)) {
-                const connection = await fusionValue.getChangedSignal().connect(async (value: any) => {
-                    const result = await handleComputedRenderCallback(callback, use, element, property);
-                    onUpdateCallback && onUpdateCallback(result);
-                });
-                connections.set(fusionValue, connection);
+                if (fusionValue && typeof fusionValue.getChangedSignal === "function") {
+                    const signal = fusionValue.getChangedSignal();
+                    if (signal && typeof signal.connect === "function") {
+                        const connection = await signal.connect(async (value: any) => {
+                            const result = await handleComputedRenderCallback(callback, use, element, property);
+                            onUpdateCallback && onUpdateCallback(result);
+                        });
+                        connections.set(fusionValue, connection);
+                    }
+                }
             }
 
             return peek(fusionValue);
@@ -63,6 +72,11 @@ export default (callback: ComputedCallback<any>, cleanupCallback?: ComputedClean
                 cleanupCallback && cleanupCallback();
             });
         }
+
+        computedDeconstructorsAmount++;
+        computedDeconstructors.set(computedDeconstructorsAmount, () => {
+            computedReturn.cleanup();
+        });
 
         handleComputedRenderCallback(callback, use, element, property);
 

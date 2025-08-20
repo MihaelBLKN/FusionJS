@@ -9,14 +9,16 @@ import { EventListenerCallback } from "../../core/onEvent/onEvent";
 import { ComputedFactoryCallback, EventCleanupCallbacks } from "./new";
 import remoteRemove from "../../remoteRemove";
 import { ComputedReturn } from "../computed/computed";
+import { Scope } from "../scope/scope";
 
 const processOnEvents = (
     value: Record<string, EventListenerCallback>,
     eventCleanupCallbacks: EventCleanupCallbacks,
-    newElement: HTMLElement
+    newElement: HTMLElement,
+    scope: Scope
 ) => {
     Object.entries(value).forEach(([eventName, eventListener]) => {
-        const cleanup = eventListener(newElement);
+        const cleanup = eventListener(newElement, scope);
         if (cleanup) {
             eventCleanupCallbacks[eventName] = eventCleanupCallbacks[eventName] || [];
             eventCleanupCallbacks[eventName].push(cleanup);
@@ -45,9 +47,10 @@ export const processProperty = (key: string, newElement: HTMLElement, value: any
 const processComputed = (
     key: string,
     newElement: HTMLElement,
-    computedFactoryCallback: ComputedFactoryCallback
+    computedFactoryCallback: ComputedFactoryCallback,
+    scope: Scope
 ): (() => void) => {
-    const info = computedFactoryCallback(key, newElement);
+    const info = computedFactoryCallback(key, newElement, scope);
     return info.cleanup;
 };
 
@@ -58,15 +61,18 @@ export type PropertyHandler = (
     context: {
         eventCleanupCallbacks: EventCleanupCallbacks,
         computedCleanupCallbacks: { [key: string]: () => void }
-    }
+    },
+    scope: Scope
 ) => void;
 
 const handleComputedWithCleanupReturn = (
     key: string,
     element: HTMLElement,
     value: any,
-    ctx: { eventCleanupCallbacks: EventCleanupCallbacks, computedCleanupCallbacks: { [key: string]: () => void } }) => {
-    const cleanup = processComputed(key, element, value as ComputedFactoryCallback);
+    ctx: { eventCleanupCallbacks: EventCleanupCallbacks, computedCleanupCallbacks: { [key: string]: () => void } },
+    scope: Scope
+) => {
+    const cleanup = processComputed(key, element, value as ComputedFactoryCallback, scope);
     if (cleanup) {
         ctx.computedCleanupCallbacks[key] = cleanup;
     }
@@ -75,8 +81,8 @@ const handleComputedWithCleanupReturn = (
 }
 
 export const propertyHandlers: Record<string, PropertyHandler> = {
-    onEvents: (key, value, element, ctx) => {
-        processOnEvents(value, ctx.eventCleanupCallbacks, element);
+    onEvents: (key, value, element, ctx, scope: Scope) => {
+        processOnEvents(value, ctx.eventCleanupCallbacks, element, scope);
     },
     parent: (key, value, element) => {
         processParent(value, element);
@@ -84,13 +90,22 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
     class: (key, value, element) => {
         element.classList.add(value as string);
     },
-    style: (key, value, element) => {
+    style: (key, value, element, ctx, scope) => {
+        const deconstructorsScope = scope.getDeconstructors();
+        const computedDeconstructorsMap = deconstructorsScope.computed;
+        let computedDeconstructorsAmount = computedDeconstructorsMap.size;
+
         Object.entries(value).forEach(([prop, val]) => {
             if (typeof val === "function" && val.length > 0) {
-                const computedInstance = val(prop, element);
+                const computedInstance = val(prop, element, scope);
 
                 computedInstance.setOnUpdateCallback((newValue: any) => {
                     processStyleValue(prop, newValue, element);
+                });
+
+                computedDeconstructorsAmount++;
+                computedDeconstructorsMap.set(computedDeconstructorsAmount, () => {
+                    computedInstance.cleanup();
                 });
             } else {
                 processStyleValue(prop, val, element);
@@ -163,10 +178,10 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
     default: (key, value, element) => {
         processProperty(key, element, value);
     },
-    computed: (key, value, element, ctx) => {
-        handleComputedWithCleanupReturn(key, element, value, ctx);
+    computed: (key, value, element, ctx, scope) => {
+        handleComputedWithCleanupReturn(key, element, value, ctx, scope);
     },
-    children: async (key, value, element, ctx) => {
+    children: async (key, value, element, ctx, scope) => {
         let currentChildren: HTMLElement[] = [];
         let lastValue: unknown;
 
@@ -204,9 +219,18 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
                 return
             }
 
+            const deconstructorsScopeAppend = scope.getDeconstructors();
+            const elementDeconstructorsMap = deconstructorsScopeAppend.element;
+            let elementDeconstructorsAmount = elementDeconstructorsMap.size;
+
             if (children instanceof HTMLElement) {
                 element.appendChild(children);
                 currentChildren.push(children);
+
+                elementDeconstructorsAmount++;
+                elementDeconstructorsMap.set(elementDeconstructorsAmount, () => {
+                    element.removeChild(children);
+                });
             } else if (Array.isArray(children)) {
                 children.forEach(child => {
                     if (!(child instanceof HTMLElement)) {
@@ -214,8 +238,14 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
                             `Invalid child: expected HTMLElement, got ${typeof child}`
                         );
                     }
+
                     element.appendChild(child);
                     currentChildren.push(child);
+
+                    elementDeconstructorsAmount++;
+                    elementDeconstructorsMap.set(elementDeconstructorsAmount, () => {
+                        element.removeChild(child);
+                    });
                 });
             } else if (typeof children === "function") {
                 appendChildren(children());
@@ -229,7 +259,7 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
         if (value instanceof HTMLElement || Array.isArray(value) || value == null) {
             appendChildren(value);
         } else if (typeof value === "function") {
-            const cleanup = handleComputedWithCleanupReturn(key, element, value, ctx);
+            const cleanup = handleComputedWithCleanupReturn(key, element, value, ctx, scope);
             value = await value();
 
             const originalCallback = value.__callback;
@@ -246,7 +276,6 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
 
             value.__callback();
             if (cleanup) ctx.computedCleanupCallbacks[key] = cleanup;
-
         } else {
             throw new Error(
                 `Invalid children property: must be HTMLElement, HTMLElement[], computed, or null/undefined`
@@ -255,7 +284,7 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
     }
 };
 
-export const newEl = (elementClass: string, elementProperties: HTMLAttributes) => {
+export const newEl = (elementClass: string, elementProperties: HTMLAttributes, scope: Scope) => {
     const newElement = document.createElement(elementClass);
     const eventCleanupCallbacks = {} as EventCleanupCallbacks;
     const computedCleanupCallbacks = {} as { [key: string]: () => void };
@@ -275,14 +304,28 @@ export const newEl = (elementClass: string, elementProperties: HTMLAttributes) =
             handler = propertyHandlers.children;
         }
 
-        handler(key, value, newElement, { eventCleanupCallbacks, computedCleanupCallbacks });
+        handler(key, value, newElement, { eventCleanupCallbacks, computedCleanupCallbacks }, scope);
+    });
+
+    const cleanupFunc = () => {
+        Object.values(eventCleanupCallbacks).forEach(cleanupCallbacks => {
+            cleanupCallbacks.forEach(cleanup => cleanup());
+        });
+    }
+
+    const deconstructorsScope = scope.getDeconstructors();
+    const elementDeconstructors = deconstructorsScope.element;
+    elementDeconstructors.set(elementDeconstructors.size + 1, () => {
+        cleanupFunc();
+
+        if (newElement && newElement.parentElement) {
+            newElement.parentElement.removeChild(newElement);
+        }
     });
 
     remoteRemove(newElement);
     newElement.addEventListener("remove", () => {
-        Object.values(eventCleanupCallbacks).forEach(cleanupCallbacks => {
-            cleanupCallbacks.forEach(cleanup => cleanup());
-        });
+        cleanupFunc();
     });
 
     return newElement;
@@ -293,7 +336,8 @@ export const applyProperty = (
     key: string,
     value: any,
     eventCleanupCallbacks: EventCleanupCallbacks = {},
-    computedCleanupCallbacks: { [key: string]: () => void } = {}
+    computedCleanupCallbacks: { [key: string]: () => void } = {},
+    scope: Scope
 ) => {
     let handler: PropertyHandler;
 
@@ -305,5 +349,5 @@ export const applyProperty = (
         handler = propertyHandlers.default;
     }
 
-    handler(key, value, element, { eventCleanupCallbacks, computedCleanupCallbacks });
+    handler(key, value, element, { eventCleanupCallbacks, computedCleanupCallbacks }, scope);
 };

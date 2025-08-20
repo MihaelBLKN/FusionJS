@@ -6,10 +6,17 @@
 //> -------------------------------- <//
 import { ValueReturnCallback } from "./value";
 import signal from "../signal";
+import { Scope } from "../../dom/scope/scope";
 
-export default (initialValue: any) => {
+export default (initialValue: any, scope: Scope) => {
     let currentValue = initialValue;
     const changedSignal = signal();
+
+    const deconstructorsScope = scope.getDeconstructors();
+    deconstructorsScope.value.set(deconstructorsScope.value.size + 1, () => {
+        (changedSignal as any) = undefined;
+        changedSignal.disconnectAll();
+    });
 
     return {
         set: (value: any) => {
