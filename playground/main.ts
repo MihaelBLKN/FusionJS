@@ -1,4 +1,4 @@
-import { newEl, value, signal, onEvent, computed, peek, hydrate, observer } from "../src";
+import { newEl, value, signal, onEvent, computed, peek, hydrate, observer, onChange } from "../src";
 import { UseInstruction } from "../src/dom/computed/computed";
 
 const testValue = value("test");
@@ -6,8 +6,12 @@ const testButton = newEl(
     "button",
     {
         onEvents: {
-            exampleEvent: onEvent("click", (element, event) => {
+            exampleListenerEvent: onEvent("click", (element, event) => {
                 testValue.set(peek(testValue) === "test" ? "clicked" : "test");
+            }),
+
+            exampleChangeEvent: onChange("innerText", (newValue: string) => {
+                console.log("Inner text changed to:", newValue);
             })
         },
 

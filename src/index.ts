@@ -12,5 +12,6 @@ import computed from "./dom/computed";
 import observer from "./core/observer";
 import peek from "./core/peek";
 import hydrate from "./dom/hydrate";
+import onChange from "./core/onChange";
 
-export { newEl, signal, value, onEvent, computed, observer, peek, hydrate };
+export { newEl, signal, value, onEvent, computed, observer, peek, hydrate, onChange };
