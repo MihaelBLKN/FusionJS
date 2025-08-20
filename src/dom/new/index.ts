@@ -84,6 +84,70 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
     class: (key, value, element) => {
         element.classList.add(value as string);
     },
+    style: (key, value, element) => {
+        Object.entries(value).forEach(([prop, val]) => {
+            if (
+                val &&
+                typeof val === "object" &&
+                (
+                    "r" in val ||
+                    "g" in val ||
+                    "b" in val ||
+                    "red" in val ||
+                    "green" in val ||
+                    "blue" in val
+                )
+            ) {
+                const colorVal = val as { r?: number; g?: number; b?: number; red?: number; green?: number; blue?: number; alpha?: number };
+                const r = colorVal.r ?? colorVal.red ?? 0;
+                const g = colorVal.g ?? colorVal.green ?? 0;
+                const b = colorVal.b ?? colorVal.blue ?? 0;
+                const a = colorVal.alpha ?? 1;
+
+                const colorString = a !== 1
+                    ? `rgba(${r},${g},${b},${a})`
+                    : `rgb(${r},${g},${b})`;
+
+                element.style.setProperty(prop, colorString);
+
+                if (prop === 'backgroundColor') {
+                    element.style.setProperty('background-color', colorString);
+                }
+            }
+            else if (
+                val &&
+                typeof val === "object" &&
+                "hex" in val
+            ) {
+                const hex = val.hex;
+                const a = (val as { alpha?: number }).alpha;
+                let finalValue: string;
+
+                if (typeof a === "number" && a >= 0 && a < 1) {
+                    let hexValue = (hex as string).replace(/^#/, "");
+                    if (hexValue.length === 3) {
+                        hexValue = hexValue.split("").map(x => x + x).join("");
+                    }
+                    const num = parseInt(hexValue, 16);
+                    const r = (num >> 16) & 255;
+                    const g = (num >> 8) & 255;
+                    const b = num & 255;
+                    finalValue = `rgba(${r},${g},${b},${a})`;
+                } else {
+                    finalValue = hex as string;
+                }
+
+                element.style.setProperty(prop, finalValue);
+
+                if (prop === 'backgroundColor') {
+                    element.style.setProperty('background-color', finalValue);
+                }
+            }
+            else {
+                element.style.setProperty(prop, val as string);
+            }
+        });
+    },
     default: (key, value, element) => {
         processProperty(key, element, value);
     },

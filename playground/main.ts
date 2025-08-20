@@ -11,6 +11,15 @@ const testButton = newEl(
             })
         },
 
+        style: {
+            color: {
+                r: 255,
+                g: 0,
+                b: 0,
+            },
+
+        },
+
         innerText: computed((use: UseInstruction<string>) => {
             return use(testValue)
         }),
