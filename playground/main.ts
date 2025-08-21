@@ -1,5 +1,4 @@
-import { doNothing, scope, scoped } from "../src";
-import { onEvent } from "../src/core/onEvent";
+import { doNothing, output, peek, scope, scoped } from "../src";
 import { UseInstruction } from "../src/dom/computed/computed";
 
 const testScope = scoped();
@@ -10,10 +9,8 @@ const innerTestScope = testScope.innerScope({
 });
 
 const testValue = testScope.value("hello world!");
-testScope.newEl("p", {
-    innerText: testScope.computed((use: UseInstruction<string>) => {
-        return use(testValue)
-    }, doNothing),
+const paragraph = testScope.newEl("p", {
+    innerText: output("innerText", testValue, true),
 
     onEvents: {
         exampleEvent: testScope.onEvent("click", (element, event) => {
@@ -28,7 +25,8 @@ testScope.newEl("p", {
     parent: document.body,
 })
 
-
+console.log(peek(testValue))
 setTimeout(() => {
-    testValue.set("hello fusion!");
+    paragraph.innerText = "Hello FusionJs!";
+    console.log(peek(testValue));
 }, 2500);

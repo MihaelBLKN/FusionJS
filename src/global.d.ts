@@ -16,6 +16,11 @@ type CSSHexData = {
     alpha?: number,
 }
 
+export type FunctionMapExport = {
+    getSignature: () => string,
+    getFactory: (...args: any[]) => any,
+}
+
 type CSSProperties = Partial<Record<keyof CSSStyleDeclaration, string | number | CSSRGBData | CSSHexData | ComputedFactoryFunction>>;
 type CleanupFunctionMap = { [key: string]: CleanupOnEventReturnFunction };
 interface HTMLAttributes {

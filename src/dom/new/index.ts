@@ -44,6 +44,14 @@ export const processProperty = (key: string, newElement: HTMLElement, value: any
     }
 };
 
+const processOutput = (key: string, newElement: HTMLElement, value: any) => {
+    if (key === undefined || newElement === undefined) {
+        return
+    }
+
+    value(newElement);
+};
+
 const processComputed = (
     key: string,
     newElement: HTMLElement,
@@ -91,22 +99,25 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
         element.classList.add(value as string);
     },
     style: (key, value, element, ctx, scope) => {
-        const deconstructorsScope = scope.getDeconstructors();
-        const computedDeconstructorsMap = deconstructorsScope.computed;
-        let computedDeconstructorsAmount = computedDeconstructorsMap.size;
-
         Object.entries(value).forEach(([prop, val]) => {
-            if (typeof val === "function" && val.length > 0) {
-                const computedInstance = val(prop, element, scope);
+            if (typeof val === "object") {
+                let signature: any = undefined;
+                if (typeof val === "function" && "getSignature" in val && typeof (val as any).getSignature === "function") {
+                    signature = (val as any).getSignature();
+                }
 
-                computedInstance.setOnUpdateCallback((newValue: any) => {
-                    processStyleValue(prop, newValue, element);
-                });
+                if (!signature) {
+                    return;
+                }
 
-                computedDeconstructorsAmount++;
-                computedDeconstructorsMap.set(computedDeconstructorsAmount, () => {
-                    computedInstance.cleanup();
-                });
+                if (typeof (val as any).getFactory === "function") {
+                    if (signature == "computed") {
+                        const computedInstance = (val as any).getFactory(prop, element, scope);
+                        computedInstance.setOnUpdateCallback((newValue: any) => {
+                            processStyleValue(prop, newValue, element);
+                        });
+                    }
+                }
             } else {
                 processStyleValue(prop, val, element);
             }
@@ -181,6 +192,9 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
     computed: (key, value, element, ctx, scope) => {
         handleComputedWithCleanupReturn(key, element, value, ctx, scope);
     },
+    output: (key, value, element, ctx, scope) => {
+        processOutput(key, element, value);
+    },
     children: async (key, value, element, ctx, scope) => {
         let currentChildren: HTMLElement[] = [];
         let lastValue: unknown;
@@ -200,37 +214,55 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
                 children = await children;
             }
 
-            if (typeof children === "object" && (children as ComputedReturn).__callback) {
-                const result = await (children as ComputedReturn).__callback();
-                if (result && result instanceof HTMLElement) {
-                    element.appendChild(result);
-                } else if (Array.isArray(result)) {
-                    result.forEach(child => {
-                        if (!(child instanceof HTMLElement)) {
-                            throw new Error(
-                                `Invalid child: expected HTMLElement, got ${typeof child}`
-                            );
+            if (children && typeof children === "object") {
+                if ((children as any).getSignature && typeof (children as any).getSignature === "function") {
+                    try {
+                        const factory = (children as any).getFactory();
+                        const result = await factory.__callback();
+                        if (result && result instanceof HTMLElement) {
+                            element.appendChild(result);
+                            currentChildren.push(result);
+                        } else if (Array.isArray(result)) {
+                            result.forEach(child => {
+                                if (!(child instanceof HTMLElement)) {
+                                    throw new Error(
+                                        `Invalid child: expected HTMLElement, got ${typeof child}`
+                                    );
+                                }
+                                element.appendChild(child);
+                                currentChildren.push(child);
+                            });
                         }
-                        element.appendChild(child);
-                        currentChildren.push(child);
-                    });
+                        return;
+                    } catch (error) {
+                        console.warn("Error occurred while processing children:", error);
+                    }
                 }
 
-                return
+                // Legacy format support
+                if ((children as ComputedReturn).__callback) {
+                    const result = await (children as ComputedReturn).__callback();
+                    if (result && result instanceof HTMLElement) {
+                        element.appendChild(result);
+                        currentChildren.push(result);
+                    } else if (Array.isArray(result)) {
+                        result.forEach(child => {
+                            if (!(child instanceof HTMLElement)) {
+                                throw new Error(
+                                    `Invalid child: expected HTMLElement, got ${typeof child}`
+                                );
+                            }
+                            element.appendChild(child);
+                            currentChildren.push(child);
+                        });
+                    }
+                    return;
+                }
             }
-
-            const deconstructorsScopeAppend = scope.getDeconstructors();
-            const elementDeconstructorsMap = deconstructorsScopeAppend.element;
-            let elementDeconstructorsAmount = elementDeconstructorsMap.size;
 
             if (children instanceof HTMLElement) {
                 element.appendChild(children);
                 currentChildren.push(children);
-
-                elementDeconstructorsAmount++;
-                elementDeconstructorsMap.set(elementDeconstructorsAmount, () => {
-                    element.removeChild(children);
-                });
             } else if (Array.isArray(children)) {
                 children.forEach(child => {
                     if (!(child instanceof HTMLElement)) {
@@ -241,11 +273,6 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
 
                     element.appendChild(child);
                     currentChildren.push(child);
-
-                    elementDeconstructorsAmount++;
-                    elementDeconstructorsMap.set(elementDeconstructorsAmount, () => {
-                        element.removeChild(child);
-                    });
                 });
             } else if (typeof children === "function") {
                 appendChildren(children());
@@ -292,8 +319,22 @@ export const newEl = (elementClass: string, elementProperties: HTMLAttributes, s
     Object.entries(elementProperties).forEach(([key, value]) => {
         let handler: PropertyHandler;
 
-        if (typeof value === "function") {
-            handler = propertyHandlers.computed;
+        if (typeof value === "object" && key !== "onEvents" && value.getSignature) {
+            try {
+                const signature = value.getSignature();
+
+                if (signature in propertyHandlers) {
+                    handler = propertyHandlers[signature];
+                } else {
+                    handler = propertyHandlers.computed;
+                }
+
+                const factory = value.getFactory();
+                value = factory;
+            } catch (error) {
+                console.warn(error)
+                handler = propertyHandlers.computed;
+            }
         } else if (key in propertyHandlers) {
             handler = propertyHandlers[key];
         } else {
@@ -342,7 +383,24 @@ export const applyProperty = (
     let handler: PropertyHandler;
 
     if (typeof value === "function") {
-        handler = propertyHandlers.computed;
+        if (value.getSignature && typeof value.getSignature === "function") {
+            try {
+                const signature = value.getSignature();
+
+                if (signature && signature.handlerType && signature.handlerType in propertyHandlers) {
+                    handler = propertyHandlers[signature.handlerType];
+                } else {
+                    handler = propertyHandlers.computed;
+                }
+
+                const factory = value.getFactory();
+                value = factory;
+            } catch (error) {
+                handler = propertyHandlers.computed;
+            }
+        } else {
+            handler = propertyHandlers.computed;
+        }
     } else if (key in propertyHandlers) {
         handler = propertyHandlers[key];
     } else {

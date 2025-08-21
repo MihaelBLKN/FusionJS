@@ -14,15 +14,71 @@ export default (property: string, callback: (newValue: any) => void) => {
         const onEventDeconstructors = deconstructorsScope.onEvent;
         let onEventDeconstructorAmount = onEventDeconstructors.size;
 
+        let descriptorSet = false;
+        try {
+            let descriptor = Object.getOwnPropertyDescriptor(element, property);
+            let targetObj = element;
+
+            if (!descriptor) {
+                let proto = Object.getPrototypeOf(element);
+                while (proto && !descriptor) {
+                    descriptor = Object.getOwnPropertyDescriptor(proto, property);
+                    if (descriptor) {
+                        targetObj = element;
+                    }
+                    proto = Object.getPrototypeOf(proto);
+                }
+            }
+
+            if (descriptor && descriptor.configurable) {
+                let internalValue = (element as any)[property];
+
+                Object.defineProperty(element, property, {
+                    get() {
+                        return internalValue;
+                    },
+                    set(newValue) {
+                        const oldValue = internalValue;
+                        internalValue = newValue;
+
+                        if (descriptor.set) {
+                            descriptor.set.call(this, newValue);
+                        }
+
+                        if (newValue !== oldValue) {
+                            previousValue = newValue;
+                            callback(newValue);
+                        }
+                    },
+                    enumerable: descriptor.enumerable ?? true,
+                    configurable: true
+                });
+
+                observers.push(() => {
+                    try {
+                        if (descriptor) {
+                            Object.defineProperty(element, property, descriptor);
+                        } else {
+                            delete (element as any)[property];
+                        }
+                    } catch (e) {
+                        console.warn(`Failed to restore descriptor for ${property}:`, e);
+                    }
+                });
+
+                descriptorSet = true;
+            }
+        } catch (error) {
+            console.warn(`Could not set up property descriptor for "${property}":`, error);
+        }
+
         const mutationObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 let shouldTrigger = false;
 
                 if (mutation.type === "attributes" && mutation.attributeName === property) {
                     shouldTrigger = true;
-                }
-
-                if (mutation.type === "childList" || mutation.type === "characterData") {
+                } else if (mutation.type === "childList" || mutation.type === "characterData") {
                     const currentValue = (element as any)[property];
                     if (currentValue !== previousValue) {
                         previousValue = currentValue;
@@ -30,7 +86,7 @@ export default (property: string, callback: (newValue: any) => void) => {
                     }
                 }
 
-                if (shouldTrigger) {
+                if (shouldTrigger && !descriptorSet) {
                     callback((element as any)[property]);
                 }
             });
@@ -46,7 +102,7 @@ export default (property: string, callback: (newValue: any) => void) => {
         observers.push(() => mutationObserver.disconnect());
 
         let pollInterval: number;
-        if (property in element || (element as any)[property] !== undefined) {
+        if (!descriptorSet && (property in element || (element as any)[property] !== undefined)) {
             pollInterval = setInterval(() => {
                 const currentValue = (element as any)[property];
                 if (currentValue !== previousValue) {
@@ -56,43 +112,6 @@ export default (property: string, callback: (newValue: any) => void) => {
             }, 100);
 
             observers.push(() => clearInterval(pollInterval));
-        }
-
-        try {
-            const descriptor = Object.getOwnPropertyDescriptor(element, property) ||
-                Object.getOwnPropertyDescriptor(Object.getPrototypeOf(element), property);
-
-            if (descriptor && descriptor.configurable) {
-                let internalValue = (element as any)[property];
-
-                Object.defineProperty(element, property, {
-                    get() {
-                        return internalValue;
-                    },
-                    set(newValue) {
-                        if (newValue !== internalValue) {
-                            internalValue = newValue;
-                            callback(newValue);
-                        }
-
-                        if (descriptor.set) {
-                            descriptor.set.call(this, newValue);
-                        }
-                    },
-                    enumerable: descriptor.enumerable,
-                    configurable: true
-                });
-
-                observers.push(() => {
-                    if (descriptor) {
-                        Object.defineProperty(element, property, descriptor);
-                    } else {
-                        delete (element as any)[property];
-                    }
-                });
-            }
-        } catch (error) {
-            console.warn(`Could not set up property descriptor for "${property}":`, error);
         }
 
         const cleanupFunc = () => {

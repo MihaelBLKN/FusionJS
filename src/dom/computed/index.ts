@@ -23,7 +23,7 @@ const handleComputedRenderCallback = async (callback: ComputedCallback<any>, use
     return result;
 }
 
-export default (callback: ComputedCallback<any>, cleanupCallback: ComputedCleanup, scope: Scope): ComputedFactoryCallback => {
+const createComputedFactory = (callback: ComputedCallback<any>, cleanupCallback: ComputedCleanup, scope: Scope): ComputedFactoryCallback => {
     return (property: string, element: HTMLElement): ComputedReturn => {
         const connections = new Map<any, Connection>();
         let onUpdateCallback: (value: any) => void;
@@ -82,4 +82,13 @@ export default (callback: ComputedCallback<any>, cleanupCallback: ComputedCleanu
 
         return computedReturn;
     };
+}
+
+export default (callback: ComputedCallback<any>, cleanupCallback: ComputedCleanup, scope: Scope) => {
+    const factory = createComputedFactory(callback, cleanupCallback, scope);
+
+    return {
+        getSignature: () => "computed",
+        getFactory: () => factory,
+    }
 }

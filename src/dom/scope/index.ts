@@ -6,8 +6,8 @@
 //> -------------------------------- <//
 import { newEl } from "../new";
 import computed from "../computed";
-import { HTMLAttributes } from "../../global";
-import { ComputedCallback, ComputedFactoryFunction } from "../computed/computed";
+import { FunctionMapExport, HTMLAttributes } from "../../global";
+import { ComputedCallback } from "../computed/computed";
 import value from "../../core/value";
 import observer, { ObserverReturn } from "../../core/observer";
 import { ValueReturnCallback } from "../../core/value/value";
@@ -105,7 +105,7 @@ export default (includeMapOrEvents?: { [key: string]: any } | boolean, includeEv
             return newEl(tagName, props, scopeMap);
         };
 
-        scopeMap.computed = (callback: ComputedCallback<any>, cleanupCallback: () => void): ComputedFactoryFunction => {
+        scopeMap.computed = (callback: ComputedCallback<any>, cleanupCallback: () => void): FunctionMapExport => {
             return computed(callback, cleanupCallback, scopeMap);
         };
 

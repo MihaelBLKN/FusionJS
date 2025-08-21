@@ -1,7 +1,7 @@
 import { ObserverReturn } from "../../core/observer";
 import { CallbackOnEvent } from "../../core/onEvent/onEvent";
 import { ValueReturnCallback } from "../../core/value/value";
-import { HTMLAttributes } from "../../global";
+import { FunctionMapExport, HTMLAttributes } from "../../global";
 import { ComputedCallback, ComputedReturn } from "../computed/computed";
 
 export interface Scope {
@@ -17,7 +17,7 @@ export interface Scope {
     deriveScope: () => Scope,
     innerScope: (includeMapOrEventsInner?: boolean | { [key: string]: any }, includeEventsInner?: boolean) => Scope,
     newEl: (tagName: string, props: HTMLAttributes) => HTMLElement,
-    computed: (callback: ComputedCallback<any>, cleanupCallback: () => void) => ComputedReturn,
+    computed: (callback: ComputedCallback<any>, cleanupCallback: () => void) => FunctionMapExport,
     value: (initialValue: any) => ValueReturnCallback<any>,
     observer: (value: ValueReturnCallback<any>) => ObserverReturn,
     onChange: (property: string, callback: (newValue: any) => void) => (element: HTMLElement, scope: Scope) => () => void,
