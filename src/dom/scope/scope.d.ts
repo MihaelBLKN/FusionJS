@@ -5,6 +5,7 @@ import { CallbackOnEvent } from "../../core/onEvent/onEvent";
 import { ValueReturnCallback } from "../../core/value/value";
 import { FunctionMapExport, HTMLAttributes } from "../../global";
 import { ComputedCallback, ComputedReturn } from "../computed/computed";
+import { SpringFactoryOptions } from "../spring";
 
 export interface Scope {
     doCleanup: (extraCallback?: () => void) => void,
@@ -30,6 +31,9 @@ export interface Scope {
         callback: ForPairsCallback
     ) => Promise<any>,
     tween: (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: number[]) => number) => FunctionMapExport,
+    spring: (goalValue: ValueReturnCallback<any>,
+        scope: Scope,
+        options?: SpringFactoryOptions) => FunctionMapExport,
 
     [key: string]: (...args: any[]) => any,
 }

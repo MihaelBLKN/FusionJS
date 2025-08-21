@@ -22,6 +22,7 @@ import { ForKeysCallback } from "../../core/forKeys/forKeys";
 import forKeys from "../../core/forKeys";
 import forPairs, { ForPairsCallback } from "../../core/forPairs";
 import tween from "../tween";
+import spring, { SpringFactoryOptions } from "../spring";
 
 export default (includeMapOrEvents?: { [key: string]: any } | boolean, includeEvents?: boolean): Scope => {
     const elementDeconstructors = new Map<number, () => void>();
@@ -145,6 +146,10 @@ export default (includeMapOrEvents?: { [key: string]: any } | boolean, includeEv
 
         scopeMap.tween = (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: number[]) => number): FunctionMapExport => {
             return tween(goalValue, duration, easing, scopeMap);
+        }
+
+        scopeMap.spring = (goalValue: ValueReturnCallback<any>, scope: Scope, options?: SpringFactoryOptions): FunctionMapExport => {
+            return spring(goalValue, scope, options);
         }
     }
 

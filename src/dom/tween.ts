@@ -10,7 +10,7 @@ import { TweenService } from "../services/tweenService";
 import { Scope } from "./scope/scope"
 import peek from "../core/peek";
 
-const tweenFactory = (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: number[]) => number, scope: Scope): (property: string) => ValueReturnCallback<any> => {
+const tweenFactory = (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: any[]) => number, scope: Scope): (property: string) => ValueReturnCallback<any> => {
     return (property: string): ValueReturnCallback<any> => {
         const progressValue = scope.value(undefined);
         let to = {
@@ -20,6 +20,7 @@ const tweenFactory = (goalValue: ValueReturnCallback<any>, duration: number, eas
         const tween = TweenService.Create({
             to: to,
             duration: duration,
+            easing: easing,
             onUpdate: (current) => {
                 progressValue.set(current);
             }
@@ -33,7 +34,7 @@ const tweenFactory = (goalValue: ValueReturnCallback<any>, duration: number, eas
     }
 }
 
-export default (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: number[]) => number, scope: Scope): FunctionMapExport => {
+export default (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: any[]) => number, scope: Scope): FunctionMapExport => {
     const tweenStateValue = tweenFactory(goalValue, duration, easing, scope);
 
     return {

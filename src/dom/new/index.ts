@@ -127,7 +127,7 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
                         computedInstance.setOnUpdateCallback((newValue: any) => {
                             processStyleValue(prop, newValue, element);
                         });
-                    } else if (signature == "tween") {
+                    } else if (signature == "tween" || signature == "spring") {
                         const tweenStateValue = (val as any).getFactory()(prop);
                         let changedSignal = tweenStateValue.getChangedSignal();
                         if (changedSignal) {
