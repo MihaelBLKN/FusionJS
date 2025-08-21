@@ -8,13 +8,6 @@ import { ValueReturnCallback } from "./value/value"
 
 export default (value: ValueReturnCallback<any>) => {
     // :p
-    // :p
-    // :p
-    // :p
-    // :p
-    // :p
-    // :p
-    // :p
     // ignore private usage
     return value && (value as any)._PRIVATE_DANGEROUS_isState
         ? (value as any)._PRIVATE_DANGEROUS_get()

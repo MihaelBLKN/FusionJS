@@ -15,7 +15,12 @@ import onChange from "../../core/onChange";
 import { onEvent } from "../../core/onEvent";
 import { CallbackOnEvent, EventListenerCallback } from "../../core/onEvent/onEvent";
 import { Scope } from "./scope";
+import forValues from "../../core/forValues";
 import scope from ".";
+import { ForValuesCallback } from "../../core/forValues/forValues";
+import { ForKeysCallback } from "../../core/forKeys/forKeys";
+import forKeys from "../../core/forKeys";
+import forPairs, { ForPairsCallback } from "../../core/forPairs";
 
 export default (includeMapOrEvents?: { [key: string]: any } | boolean, includeEvents?: boolean): Scope => {
     const elementDeconstructors = new Map<number, () => void>();
@@ -123,6 +128,18 @@ export default (includeMapOrEvents?: { [key: string]: any } | boolean, includeEv
 
         scopeMap.onEvent = (event: string, callback: CallbackOnEvent): EventListenerCallback => {
             return onEvent(event, callback);
+        };
+
+        scopeMap.forValues = (haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>, callback: ForValuesCallback): Promise<any> => {
+            return forValues(haystack, callback, scopeMap);
+        };
+
+        scopeMap.forKeys = (haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>, callback: ForKeysCallback): Promise<any> => {
+            return forKeys(haystack, callback, scopeMap);
+        };
+
+        scopeMap.forPairs = (haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>, callback: ForPairsCallback): Promise<any> => {
+            return forPairs(haystack, callback, scopeMap);
         };
     }
 

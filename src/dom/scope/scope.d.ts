@@ -1,3 +1,5 @@
+import { ForKeysCallback } from "../../core/forKeys/forKeys";
+import { ForPairsCallback } from "../../core/forPairs";
 import { ObserverReturn } from "../../core/observer";
 import { CallbackOnEvent } from "../../core/onEvent/onEvent";
 import { ValueReturnCallback } from "../../core/value/value";
@@ -22,6 +24,11 @@ export interface Scope {
     observer: (value: ValueReturnCallback<any>) => ObserverReturn,
     onChange: (property: string, callback: (newValue: any) => void) => (element: HTMLElement, scope: Scope) => () => void,
     onEvent: (event: string, callback: CallbackOnEvent) => EventListenerCallback,
+    forValues: (haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>, callback: ForValuesCallback) => Promise<any>,
+    forKeys: (haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>, callback: ForKeysCallback) => Promise<any>,
+    forPairs: (haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>,
+        callback: ForPairsCallback
+    ) => Promise<any>,
 
     [key: string]: (...args: any[]) => any,
 }

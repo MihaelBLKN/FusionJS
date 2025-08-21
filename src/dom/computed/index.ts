@@ -16,6 +16,7 @@ export const createUseFactory = (onUpdate?: () => Promise<void>): {
     use: UseInstruction<any>;
     cleanup: () => void;
     getConnections: () => Map<any, Connection>;
+    update: () => Promise<void>;
 } => {
     const connections = new Map<any, Connection>();
 
@@ -25,7 +26,9 @@ export const createUseFactory = (onUpdate?: () => Promise<void>): {
                 const signal = fusionValue.getChangedSignal();
                 if (signal && typeof signal.connect === "function") {
                     const connection = await signal.connect(async (value: any) => {
-                        onUpdate && await onUpdate();
+                        if (onUpdate) {
+                            await onUpdate();
+                        }
                     });
                     connections.set(fusionValue, connection);
                 }
@@ -40,10 +43,17 @@ export const createUseFactory = (onUpdate?: () => Promise<void>): {
         connections.clear();
     };
 
+    const update = async () => {
+        if (onUpdate) {
+            await onUpdate();
+        }
+    };
+
     return {
         use,
         cleanup,
-        getConnections: () => connections
+        getConnections: () => connections,
+        update
     };
 };
 
