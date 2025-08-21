@@ -14,7 +14,7 @@ const outputFactory = (property: string, value: ValueReturnCallback<any>, change
     return async (element: HTMLElement): Promise<any> => {
         const localScope = outputScope.innerScope(true)
         let valueChangedConnection: Connection
-        const changedSignal = value.getChangedSignal()
+        let changedSignal = value.getChangedSignal()
 
         localScope.onChange(property, (newValue: any) => {
             value.set(newValue)

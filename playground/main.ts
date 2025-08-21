@@ -1,6 +1,7 @@
 import { doNothing, output, peek, scope, scoped } from "../src";
 import { UseInstruction } from "../src/dom/computed/computed";
 import { Scope } from "../src/dom/scope/scope";
+import { EasingStyles } from "../src/services/tweenService";
 
 const testScope = scoped();
 const testSoloScope = scope({ foo: "bar!" });
@@ -34,10 +35,11 @@ console.log(multiplied);
 
 testObjectValue.set({ test1: 5, test2: 6, test3: 7 });
 
+const opacityValue = testScope.value(1);
 const testValue = testScope.value("hello world!");
 const testValue2 = testScope.value(undefined);
 const paragraph = testScope.newEl("p", {
-    innerText: output("innerText", testValue, true),
+    innerText: "testText",
 
     onEvents: {
         exampleEvent: testScope.onEvent("click", (element, event) => {
@@ -49,9 +51,11 @@ const paragraph = testScope.newEl("p", {
         })
     },
 
-    parent: testScope.computed((use: UseInstruction<HTMLElement>) => {
-        return use(testValue2)
-    }, doNothing),
+    style: {
+        opacity: testScope.tween(opacityValue, 1000, EasingStyles.easeInQuad)
+    },
+
+    parent: document.body,
 })
 
 setTimeout(() => {
@@ -59,4 +63,5 @@ setTimeout(() => {
     console.log(peek(testValue));
     testValue2.set(document.body);
     console.log(multiplied);
+    opacityValue.set(1);
 }, 2500);

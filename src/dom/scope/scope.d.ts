@@ -29,6 +29,7 @@ export interface Scope {
     forPairs: (haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>,
         callback: ForPairsCallback
     ) => Promise<any>,
+    tween: (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: number[]) => number) => FunctionMapExport,
 
     [key: string]: (...args: any[]) => any,
 }

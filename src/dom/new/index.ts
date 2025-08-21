@@ -10,6 +10,7 @@ import { ComputedFactoryCallback, EventCleanupCallbacks } from "./new";
 import remoteRemove from "../../remoteRemove";
 import { ComputedReturn } from "../computed/computed";
 import { Scope } from "../scope/scope";
+import peek from "../../core/peek";
 
 const processOnEvents = (
     value: Record<string, EventListenerCallback>,
@@ -112,7 +113,7 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
         Object.entries(value).forEach(([prop, val]) => {
             if (typeof val === "object") {
                 let signature: any = undefined;
-                if (typeof val === "function" && "getSignature" in val && typeof (val as any).getSignature === "function") {
+                if ((val as any).getSignature) {
                     signature = (val as any).getSignature();
                 }
 
@@ -126,6 +127,14 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
                         computedInstance.setOnUpdateCallback((newValue: any) => {
                             processStyleValue(prop, newValue, element);
                         });
+                    } else if (signature == "tween") {
+                        const tweenStateValue = (val as any).getFactory()(prop);
+                        let changedSignal = tweenStateValue.getChangedSignal();
+                        if (changedSignal) {
+                            changedSignal.connect(() => {
+                                processStyleValue(prop, peek(tweenStateValue)[prop], element)
+                            });
+                        }
                     }
                 }
             } else {
