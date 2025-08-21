@@ -10,6 +10,7 @@ import hydrate from "./dom/hydrate";
 import scope from "./dom/scope";
 import scoped from "./dom/scoped";
 import output from "./core/output";
+import contextual from "./core/contextual";
 const doNothing = () => { };
 
-export { signal, peek, hydrate, scope, scoped, output, doNothing };
+export { signal, peek, hydrate, scope, scoped, output, doNothing, contextual };
