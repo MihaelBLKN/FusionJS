@@ -23,7 +23,7 @@ export default (): Signal<any> => {
         connect: async (callback) => {
             const connection: Connection = {
                 disconnect: () => {
-                    const signalConnections = connections[signalId];
+                    const signalConnections = connections[signalId as number];
 
                     if (signalConnections) {
                         const index = signalConnections.indexOf(connection);
@@ -38,17 +38,20 @@ export default (): Signal<any> => {
                 _active: true,
             }
 
-            if (!connections[signalId]) {
-                connections[signalId] = [];
+            if (!connections[signalId as number]) {
+                connections[signalId as number] = [];
             }
 
-            connections[signalId].push(connection);
+            if (!connections[signalId as number]) {
+                connections[signalId as number] = [];
+            }
+            connections[signalId as number]!.push(connection);
 
             return connection;
         },
 
         fire: (value) => {
-            const signalConnections = connections[signalId];
+            const signalConnections = connections[signalId as number];
             if (signalConnections) {
                 signalConnections.forEach((connection) => {
                     if (connection._active) {
@@ -59,8 +62,11 @@ export default (): Signal<any> => {
         },
 
         disconnectAll: () => {
-            connections[signalId].forEach((connection) => connection.disconnect());
-            delete connections[signalId];
+            const signalConnections = connections[signalId as number];
+            if (signalConnections) {
+                signalConnections.forEach((connection) => connection.disconnect());
+                delete connections[signalId as number];
+            }
         }
     }
 }

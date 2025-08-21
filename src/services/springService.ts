@@ -73,8 +73,9 @@ class Spring {
 
                 (["r", "g", "b"] as const).forEach((channel) => {
                     const force = this.options.stiffness! * (toRGB[channel] - fromRGB[channel]);
-                    const damping = this.options.damping! * velocity;
+                    const damping = this.options.damping! * (velocity ?? 0);
                     const acceleration = (force - damping) / this.options.mass!;
+                    if (this.velocity[key] === undefined) this.velocity[key] = 0;
                     this.velocity[key] += acceleration * dt;
                     newRGB[channel] = Math.round(fromRGB[channel] + this.velocity[key] * dt);
                     if (Math.abs(this.velocity[key]) > 0.001 || Math.abs(toRGB[channel] - newRGB[channel]) > 0.001) allAtRest = false;
@@ -83,9 +84,9 @@ class Spring {
                 next[key] = rgbToHex(newRGB);
             } else {
                 const force = this.options.stiffness! * (toVal - fromVal);
-                const damping = this.options.damping! * this.velocity[key];
+                const damping = this.options.damping! * (this.velocity[key] ?? 0);
                 const acceleration = (force - damping) / this.options.mass!;
-                this.velocity[key] += acceleration * dt;
+                this.velocity[key] = (this.velocity[key] ?? 0) + acceleration * dt;
                 next[key] = fromVal + this.velocity[key] * dt;
 
                 if (Math.abs(this.velocity[key]) > 0.001 || Math.abs(toVal - next[key]) > 0.001) allAtRest = false;
