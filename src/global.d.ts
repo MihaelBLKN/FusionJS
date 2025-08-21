@@ -1,4 +1,5 @@
 import { CleanupOnEventReturnFunction } from "./core/onEvent/onEvent";
+import { ValueReturnCallback } from "./core/value/value";
 import { Compu, ComputedFactoryFunction, ComputedReturn } from "./dom/computed/computed";
 
 interface CSSRGBData {
@@ -21,6 +22,7 @@ export type FunctionMapExport = {
     getFactory: (...args: any[]) => any,
 }
 
+export type UsedAs<T> = T | ValueReturnCallback<T>
 type CSSProperties = Partial<Record<keyof CSSStyleDeclaration, string | number | CSSRGBData | CSSHexData | FunctionMapExport>>;
 type CleanupFunctionMap = { [key: string]: CleanupOnEventReturnFunction };
 interface HTMLAttributes {
