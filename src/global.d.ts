@@ -21,14 +21,14 @@ export type FunctionMapExport = {
     getFactory: (...args: any[]) => any,
 }
 
-type CSSProperties = Partial<Record<keyof CSSStyleDeclaration, string | number | CSSRGBData | CSSHexData | ComputedFactoryFunction>>;
+type CSSProperties = Partial<Record<keyof CSSStyleDeclaration, string | number | CSSRGBData | CSSHexData | FunctionMapExport>>;
 type CleanupFunctionMap = { [key: string]: CleanupOnEventReturnFunction };
 interface HTMLAttributes {
     id?: string;
     class?: string;
     style?: CSSProperties;
-    parent?: HTMLElement;
+    parent?: HTMLElement | FunctionMapExport;
     onEvents?: CleanupFunctionMap;
-    children?: HTMLElement[] | ComputedFactoryFunction;
+    children?: HTMLElement[] | FunctionMapExport;
     [key: string]: any; // any cuz who's there to stop me?
 }

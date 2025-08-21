@@ -9,6 +9,7 @@ const innerTestScope = testScope.innerScope({
 });
 
 const testValue = testScope.value("hello world!");
+const testValue2 = testScope.value(undefined);
 const paragraph = testScope.newEl("p", {
     innerText: output("innerText", testValue, true),
 
@@ -22,11 +23,14 @@ const paragraph = testScope.newEl("p", {
         })
     },
 
-    parent: document.body,
+    parent: testScope.computed((use: UseInstruction<HTMLElement>) => {
+        return use(testValue2)
+    }, doNothing),
 })
 
 console.log(peek(testValue))
 setTimeout(() => {
     paragraph.innerText = "Hello FusionJs!";
     console.log(peek(testValue));
+    testValue2.set(document.body);
 }, 2500);

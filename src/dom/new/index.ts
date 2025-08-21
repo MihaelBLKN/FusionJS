@@ -26,7 +26,17 @@ const processOnEvents = (
     });
 };
 
-const processParent = (value: HTMLElement | null, newElement: HTMLElement) => {
+const processParent = (value: HTMLElement | null, newElement: HTMLElement, ctx: { eventCleanupCallbacks: EventCleanupCallbacks, computedCleanupCallbacks: { [key: string]: () => void } }, scope: Scope) => {
+    if ((value as any).getSignature) {
+        const signature = (value as any).getSignature();
+        if (signature in propertyHandlers) {
+            const handler = propertyHandlers[signature];
+            handler("parent", value, newElement, ctx, scope);
+        }
+
+        return
+    }
+
     if (value instanceof HTMLElement) {
         value.appendChild(newElement);
     }
@@ -92,8 +102,8 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
     onEvents: (key, value, element, ctx, scope: Scope) => {
         processOnEvents(value, ctx.eventCleanupCallbacks, element, scope);
     },
-    parent: (key, value, element) => {
-        processParent(value, element);
+    parent: (key, value, element, ctx, scope) => {
+        processParent(value, element, ctx, scope);
     },
     class: (key, value, element) => {
         element.classList.add(value as string);
@@ -382,29 +392,30 @@ export const applyProperty = (
 ) => {
     let handler: PropertyHandler;
 
-    if (typeof value === "function") {
-        if (value.getSignature && typeof value.getSignature === "function") {
-            try {
-                const signature = value.getSignature();
+    if (typeof value === "object" && key !== "onEvents" && value.getSignature) {
+        try {
+            const signature = value.getSignature();
 
-                if (signature && signature.handlerType && signature.handlerType in propertyHandlers) {
-                    handler = propertyHandlers[signature.handlerType];
-                } else {
-                    handler = propertyHandlers.computed;
-                }
-
-                const factory = value.getFactory();
-                value = factory;
-            } catch (error) {
+            if (signature in propertyHandlers) {
+                handler = propertyHandlers[signature];
+            } else {
                 handler = propertyHandlers.computed;
             }
-        } else {
+
+            const factory = value.getFactory();
+            value = factory;
+        } catch (error) {
+            console.warn(error)
             handler = propertyHandlers.computed;
         }
     } else if (key in propertyHandlers) {
         handler = propertyHandlers[key];
     } else {
         handler = propertyHandlers.default;
+    }
+
+    if (key == "children") {
+        handler = propertyHandlers.children;
     }
 
     handler(key, value, element, { eventCleanupCallbacks, computedCleanupCallbacks }, scope);

@@ -15,6 +15,25 @@ import { Scope } from "../scope/scope";
 const handleComputedRenderCallback = async (callback: ComputedCallback<any>, use: UseInstruction<any>, element: HTMLElement, property: string) => {
     const result = await (callback as (use: UseInstruction<any>) => any)(use);
 
+    if (property === "parent") {
+        const newParent = result as HTMLElement | null;
+        const currentParent = element.parentElement;
+
+        if (newParent === currentParent) {
+            return result;
+        }
+
+        if (currentParent) {
+            currentParent.removeChild(element);
+        }
+
+        if (newParent && newParent instanceof HTMLElement) {
+            newParent.appendChild(element);
+        }
+
+        return result;
+    }
+
     if (property === "children") {
         return result;
     }
