@@ -12,6 +12,41 @@ import peek from "../../core/peek";
 import { ComputedFactoryCallback } from "../new/new";
 import { Scope } from "../scope/scope";
 
+export const createUseFactory = (onUpdate?: () => Promise<void>): {
+    use: UseInstruction<any>;
+    cleanup: () => void;
+    getConnections: () => Map<any, Connection>;
+} => {
+    const connections = new Map<any, Connection>();
+
+    const use: UseInstruction<any> = async (fusionValue) => {
+        if (!connections.has(fusionValue)) {
+            if (fusionValue && typeof fusionValue.getChangedSignal === "function") {
+                const signal = fusionValue.getChangedSignal();
+                if (signal && typeof signal.connect === "function") {
+                    const connection = await signal.connect(async (value: any) => {
+                        onUpdate && await onUpdate();
+                    });
+                    connections.set(fusionValue, connection);
+                }
+            }
+        }
+
+        return peek(fusionValue);
+    };
+
+    const cleanup = () => {
+        connections.forEach(connection => connection.disconnect());
+        connections.clear();
+    };
+
+    return {
+        use,
+        cleanup,
+        getConnections: () => connections
+    };
+};
+
 const handleComputedRenderCallback = async (callback: ComputedCallback<any>, use: UseInstruction<any>, element: HTMLElement, property: string) => {
     const result = await (callback as (use: UseInstruction<any>) => any)(use);
 
@@ -44,50 +79,35 @@ const handleComputedRenderCallback = async (callback: ComputedCallback<any>, use
 
 const createComputedFactory = (callback: ComputedCallback<any>, cleanupCallback: ComputedCleanup, scope: Scope): ComputedFactoryCallback => {
     return (property: string, element: HTMLElement): ComputedReturn => {
-        const connections = new Map<any, Connection>();
         let onUpdateCallback: (value: any) => void;
         const deconstructorsScope = scope.getDeconstructors();
         const computedDeconstructors = deconstructorsScope.computed;
         let computedDeconstructorsAmount = computedDeconstructors.size;
 
-        const use: UseInstruction<any> = async (fusionValue) => {
-            if (!connections.has(fusionValue)) {
-                if (fusionValue && typeof fusionValue.getChangedSignal === "function") {
-                    const signal = fusionValue.getChangedSignal();
-                    if (signal && typeof signal.connect === "function") {
-                        const connection = await signal.connect(async (value: any) => {
-                            const result = await handleComputedRenderCallback(callback, use, element, property);
-                            onUpdateCallback && onUpdateCallback(result);
-                        });
-                        connections.set(fusionValue, connection);
-                    }
-                }
-            }
-
-            return peek(fusionValue);
-        };
+        const useFactory = createUseFactory(async () => {
+            const result = await handleComputedRenderCallback(callback, useFactory.use, element, property);
+            onUpdateCallback && onUpdateCallback(result);
+        });
 
         const computedReturn = {
             cleanup: () => {
-                connections.forEach(connection => connection.disconnect());
-                connections.clear();
+                useFactory.cleanup();
                 cleanupCallback && cleanupCallback();
             },
 
             __callback: async () => {
-                return await handleComputedRenderCallback(callback, use, element, property);
+                return await handleComputedRenderCallback(callback, useFactory.use, element, property);
             },
 
             setOnUpdateCallback: (callback: (newValue: any) => void) => {
-                onUpdateCallback = callback
+                onUpdateCallback = callback;
             }
         };
 
         if (element) {
             remoteRemove(element);
             element.addEventListener("remove", () => {
-                connections.forEach(connection => connection.disconnect());
-                connections.clear();
+                useFactory.cleanup();
                 cleanupCallback && cleanupCallback();
             });
         }
@@ -97,7 +117,7 @@ const createComputedFactory = (callback: ComputedCallback<any>, cleanupCallback:
             computedReturn.cleanup();
         });
 
-        handleComputedRenderCallback(callback, use, element, property);
+        handleComputedRenderCallback(callback, useFactory.use, element, property);
 
         return computedReturn;
     };
