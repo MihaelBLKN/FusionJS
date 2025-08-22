@@ -1,3 +1,5 @@
+import { ValueReturnCallback } from "../core/value";
+
 type EasingFunction = (t: number) => number;
 
 const Easing = {
@@ -21,6 +23,7 @@ interface TweenOptions {
     element?: HTMLElement;
     to: Record<string, any>;
     duration: number;
+    progressValue: ValueReturnCallback<any>,
     easing?: EasingFunction;
     onComplete?: () => void;
     onUpdate?: (current: Record<string, any>) => void;
@@ -110,17 +113,24 @@ class Tween {
     }
 }
 
-const activeTweens = new WeakMap<HTMLElement, Tween>();
+const activeElementTweens = new WeakMap<HTMLElement, Tween>();
+const activeValueTweens = new WeakMap<ValueReturnCallback<any>, Tween>();
 export const TweenService = {
     Create: (options: TweenOptions) => {
         const tween = new Tween(options);
 
         if (options.element) {
-            const previousTween = activeTweens.get(options.element);
+            const previousTween = activeElementTweens.get(options.element);
             if (previousTween) {
                 previousTween.stop();
             }
-            activeTweens.set(options.element, tween);
+            activeElementTweens.set(options.element, tween);
+        } else {
+            const previousTween = activeValueTweens.get(options.progressValue);
+            if (previousTween) {
+                previousTween.stop();
+            }
+            activeValueTweens.set(options.progressValue, tween);
         }
 
         tween.start();

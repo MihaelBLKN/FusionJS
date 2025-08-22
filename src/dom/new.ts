@@ -121,7 +121,7 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
                     return;
                 }
 
-                if (typeof (val as any).getFactory === "function") {
+                if ((val as any).getFactory) {
                     if (signature == "computed") {
                         const computedInstance = (val as any).getFactory(prop, element, scope);
                         computedInstance.setOnUpdateCallback((newValue: any) => {

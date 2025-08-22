@@ -17,10 +17,27 @@ const tweenFactory = (goalValue: ValueReturnCallback<any>, duration: number, eas
             [property]: peek(goalValue)
         }
 
+        goalValue.getChangedSignal()?.connect((newValue) => {
+            TweenService.Create({
+                to: { [property]: newValue },
+                duration: duration,
+                easing: easing,
+                progressValue: progressValue,
+                onUpdate: (current) => {
+                    progressValue.set(current);
+                }
+            });
+
+            setTimeout(() => {
+                progressValue.set(newValue);
+            }, 10);
+        });
+
         const tween = TweenService.Create({
             to: to,
             duration: duration,
             easing: easing,
+            progressValue: progressValue,
             onUpdate: (current) => {
                 progressValue.set(current);
             }

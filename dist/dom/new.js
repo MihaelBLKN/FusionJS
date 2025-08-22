@@ -71,7 +71,7 @@ export const propertyHandlers = {
                 if (!signature) {
                     return;
                 }
-                if (typeof val.getFactory === "function") {
+                if (val.getFactory) {
                     if (signature == "computed") {
                         const computedInstance = val.getFactory(prop, element, scope);
                         computedInstance.setOnUpdateCallback((newValue) => {

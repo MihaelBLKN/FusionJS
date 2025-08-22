@@ -85,16 +85,24 @@ class Tween {
         this.rafId = null;
     }
 }
-const activeTweens = new WeakMap();
+const activeElementTweens = new WeakMap();
+const activeValueTweens = new WeakMap();
 export const TweenService = {
     Create: (options) => {
         const tween = new Tween(options);
         if (options.element) {
-            const previousTween = activeTweens.get(options.element);
+            const previousTween = activeElementTweens.get(options.element);
             if (previousTween) {
                 previousTween.stop();
             }
-            activeTweens.set(options.element, tween);
+            activeElementTweens.set(options.element, tween);
+        }
+        else {
+            const previousTween = activeValueTweens.get(options.progressValue);
+            if (previousTween) {
+                previousTween.stop();
+            }
+            activeValueTweens.set(options.progressValue, tween);
         }
         tween.start();
         return tween;

@@ -1,8 +1,10 @@
+import { ValueReturnCallback } from "../core/value";
 type EasingFunction = (t: number) => number;
 interface TweenOptions {
     element?: HTMLElement;
     to: Record<string, any>;
     duration: number;
+    progressValue: ValueReturnCallback<any>;
     easing?: EasingFunction;
     onComplete?: () => void;
     onUpdate?: (current: Record<string, any>) => void;
