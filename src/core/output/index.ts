@@ -4,10 +4,10 @@
 //> MIT License (usage without warranty)
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
-import { ValueReturnCallback } from "./value/value"
-import { Connection } from "./signal/signal"
-import { scope } from "../dom/scope"
-import { FunctionMapExport } from "../global"
+import { ValueReturnCallback } from "../value/value"
+import { Connection } from "../signal/signal"
+import { scope } from "../../dom/scope"
+import { FunctionMapExport } from "../../global"
 
 const outputScope = scope()
 const outputFactory = (property: string, value: ValueReturnCallback<any>, changePropertyOnValueChange?: boolean) => {

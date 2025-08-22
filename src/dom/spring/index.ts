@@ -4,11 +4,11 @@
 //> MIT License (usage without warranty)
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
-import { ValueReturnCallback } from "../core/value/value"
-import { FunctionMapExport } from "../global";
-import { SpringService } from "../services/springService";
-import { Scope } from "./scope/scope"
-import { peek } from "../core/peek";
+import { ValueReturnCallback } from "../../core/value/value"
+import { FunctionMapExport } from "../../global";
+import { SpringService } from "../../services/springService";
+import { Scope } from "../scope/scope"
+import { peek } from "../../core/peek";
 
 export interface SpringFactoryOptions {
     stiffness?: number;

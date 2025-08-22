@@ -4,11 +4,11 @@
 //> MIT License (usage without warranty)
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
-import remoteRemove from "../remoteRemove";
-import { HTMLAttributes } from "../global";
-import { applyProperty } from "./new";
-import { scope } from "./scope";
-import { EventCleanupCallbacks } from "./new/new";
+import remoteRemove from "../../remoteRemove";
+import { HTMLAttributes } from "../../global";
+import { applyProperty } from "../new";
+import { scope } from "../scope";
+import { EventCleanupCallbacks } from "../new/new";
 
 const hydrationScope = scope();
 const eventCleanupCallbacks: EventCleanupCallbacks = {};

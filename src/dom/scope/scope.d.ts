@@ -1,11 +1,18 @@
-import { ForKeysCallback } from "../../core/forKeys/forKeys";
+import { ForKeys, ForKeysCallback } from "../../core/forKeys/forKeys";
 import { ForPairsCallback } from "../../core/forPairs";
+import { ForPairs } from "../../core/forPairs/forPairs";
+import { ForValues } from "../../core/forValues/forValues";
 import { ObserverReturn } from "../../core/observer";
-import { CallbackOnEvent } from "../../core/onEvent/onEvent";
-import { ValueReturnCallback } from "../../core/value/value";
+import { Observer } from "../../core/observer/observer";
+import { OnChange } from "../../core/onChange/onChange";
+import { CallbackOnEvent, OnEvent } from "../../core/onEvent/onEvent";
+import { Value, ValueReturnCallback } from "../../core/value/value";
 import { FunctionMapExport, HTMLAttributes } from "../../global";
-import { ComputedCallback, ComputedReturn } from "../computed/computed";
+import { Computed, ComputedCallback, ComputedReturn } from "../computed/computed";
+import { NewEl } from "../new/new";
 import { SpringFactoryOptions } from "../spring";
+import { Spring } from "../spring/spring";
+import { Tween } from "../tween/tween";
 
 export interface Scope {
     doCleanup: (extraCallback?: () => void) => void,
@@ -19,21 +26,15 @@ export interface Scope {
 
     deriveScope: () => Scope,
     innerScope: (includeMapOrEventsInner?: boolean | { [key: string]: any }, includeEventsInner?: boolean) => Scope,
-    newEl: (tagName: string, props: HTMLAttributes) => HTMLElement,
-    computed: (callback: ComputedCallback<any>, cleanupCallback: () => void) => FunctionMapExport,
-    value: (initialValue: any) => ValueReturnCallback<any>,
-    observer: (value: ValueReturnCallback<any>) => ObserverReturn,
-    onChange: (property: string, callback: (newValue: any) => void) => (element: HTMLElement, scope: Scope) => () => void,
-    onEvent: (event: string, callback: CallbackOnEvent) => EventListenerCallback,
-    forValues: (haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>, callback: ForValuesCallback) => Promise<any>,
-    forKeys: (haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>, callback: ForKeysCallback) => Promise<any>,
-    forPairs: (haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>,
-        callback: ForPairsCallback
-    ) => Promise<any>,
-    tween: (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: number[]) => number) => FunctionMapExport,
-    spring: (goalValue: ValueReturnCallback<any>,
-        scope: Scope,
-        options?: SpringFactoryOptions) => FunctionMapExport,
-
-    [key: string]: (...args: any[]) => any,
+    newEl: NewEl,
+    computed: Computed,
+    value: Value,
+    observer: Observer,
+    onChange: OnChange,
+    onEvent: OnEvent,
+    forValues: ForValues,
+    forKeys: ForKeys,
+    forPairs: ForPairs,
+    tween: Tween,
+    spring: Spring,
 }

@@ -4,7 +4,7 @@
 //> MIT License (usage without warranty)
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
-import { Scope } from "../dom/scope/scope";
+import { Scope } from "../../dom/scope/scope";
 
 export const onChange = (property: string, callback: (newValue: any) => void) => {
     return (element: HTMLElement, scope: Scope) => {

@@ -4,8 +4,8 @@
 //> MIT License (usage without warranty)
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
-import { scope } from "./scope";
-import { Scope } from "./scope/scope";
+import { scope } from "../scope";
+import { Scope } from "../scope/scope";
 
 const globalScope = scope(true);
 export const scoped = (map?: { [key: string]: any }): Scope => {

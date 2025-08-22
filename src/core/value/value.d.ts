@@ -6,3 +6,5 @@ export interface ValueReturnCallback<T> {
     getChangedSignal: () => Signal<T> | undefined;
     _PRIVATE_DANGEROUS_isState: boolean;
 }
+
+export type Value<T> = ValueReturnCallback<T>;
