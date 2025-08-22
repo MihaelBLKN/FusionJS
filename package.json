@@ -1,6 +1,6 @@
 {
   "name": "fusionwebts",
-  "version": "1.0.0-fix-b-b",
+  "version": "1.0.0-fix-final",
   "description": "FusionWebTs is a port of the Fusion Roblox UI framework for the web, made with TypeScript.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
