@@ -57,6 +57,6 @@ export const spring = (
 
 export type Spring<T = any> = (
     goalValue: ValueReturnCallback<T>,
-    scope: Scope,
+    scope?: Scope,
     options?: SpringFactoryOptions
 ) => FunctionMapExport

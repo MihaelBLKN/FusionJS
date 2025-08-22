@@ -104,5 +104,5 @@ export type ForPairsCallback = (
 export type ForPairs = (
     haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>,
     callback: ForPairsCallback,
-    scope: Scope
+    scope?: Scope
 ) => Promise<any>;

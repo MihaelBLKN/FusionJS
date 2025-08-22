@@ -93,5 +93,5 @@ export type ForKeysCallback = (use: UseInstruction<any>, scope: Scope, value: an
 export type ForKeys = (
     haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>,
     callback: ForKeysCallback,
-    scope: Scope
+    scope?: Scope
 ) => Promise<any>;

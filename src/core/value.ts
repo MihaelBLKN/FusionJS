@@ -7,12 +7,12 @@
 import { signal, Signal } from "./signal";
 import { Scope } from "../dom/scope";
 
-export const value = (initialValue: any, scope: Scope) => {
+export const value = (initialValue: any, scope?: Scope) => {
     let currentValue = initialValue;
     let changedSignal = signal();
 
-    const deconstructorsScope = scope.getDeconstructors();
-    deconstructorsScope.value.set(deconstructorsScope.value.size + 1, () => {
+    const deconstructorsScope = scope?.getDeconstructors();
+    deconstructorsScope?.value.set(deconstructorsScope.value.size + 1, () => {
         (changedSignal as any) = undefined;
         changedSignal.disconnectAll();
     });

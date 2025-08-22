@@ -7,7 +7,7 @@
 import { Scope } from "../dom/scope";
 
 export const onEvent = (eventName: string, callback: CallbackOnEvent): EventListenerCallback => {
-    return (element: HTMLElement, scope: Scope) => {
+    return (element: HTMLElement, scope?: Scope) => {
         element.addEventListener(eventName, (event) => {
             callback(element, event);
         });
@@ -16,7 +16,7 @@ export const onEvent = (eventName: string, callback: CallbackOnEvent): EventList
             element.removeEventListener(eventName, () => { })
         };
 
-        scope.getDeconstructors().onEvent.set(scope.getDeconstructors().onEvent.size + 1, cleanupFunc);
+        scope?.getDeconstructors().onEvent.set(scope?.getDeconstructors().onEvent.size + 1, cleanupFunc);
 
         return cleanupFunc;
     };
@@ -24,5 +24,5 @@ export const onEvent = (eventName: string, callback: CallbackOnEvent): EventList
 
 export type CallbackOnEvent = (element: HTMLElement, event: Event) => void
 export type CleanupFunctionListener = () => void
-export type EventListenerCallback = ((element: HTMLElement, scope: Scope) => CleanupFunctionListener)
+export type EventListenerCallback = ((element: HTMLElement, scope?: Scope) => CleanupFunctionListener)
 export type OnEvent = (eventName: string, callback: CallbackOnEvent) => EventListenerCallback

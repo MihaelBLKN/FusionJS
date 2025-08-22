@@ -435,5 +435,5 @@ export interface ElementProperties extends HTMLAttributes {
 }
 
 export type EventCleanupCallbacks = { [key: string]: CleanupFunctionListener[] }
-export type ComputedFactoryCallback = (property: string, element: HTMLElement, scope: Scope) => ComputedReturn;
-export type NewEl = (elementClass: string, elementProperties: HTMLAttributes, scope: Scope) => HTMLElement;
+export type ComputedFactoryCallback = (property: string, element: HTMLElement, scope?: Scope) => ComputedReturn;
+export type NewEl = (elementClass: string, elementProperties: HTMLAttributes, scope?: Scope) => HTMLElement;

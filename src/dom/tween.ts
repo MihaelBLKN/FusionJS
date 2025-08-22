@@ -43,4 +43,4 @@ export const tween = (goalValue: ValueReturnCallback<any>, duration: number, eas
     }
 }
 
-export type Tween<T = any> = (goalValue: ValueReturnCallback<T>, duration: number, easing: (...args: any[]) => number, scope: Scope) => FunctionMapExport
+export type Tween<T = any> = (goalValue: ValueReturnCallback<T>, duration: number, easing: (...args: any[]) => number, scope?: Scope) => FunctionMapExport

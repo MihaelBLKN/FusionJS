@@ -46,5 +46,5 @@ export const observer = (
 export interface ObserverReturn { onChange: (callback: (newValue: any) => void) => () => void }
 export type Observer = (
     value: ValueReturnCallback<any>,
-    scope: Scope
+    scope?: Scope
 ) => ObserverReturn;
