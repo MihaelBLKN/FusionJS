@@ -2,6 +2,7 @@ import appearHeading from "./components/appearHeading";
 import { scoped } from "../src"
 import "./global.css";
 const app = scoped();
+import { EasingStyles } from "../src";
 
 const appDiv = app.newEl("div", {
     parent: document.body,

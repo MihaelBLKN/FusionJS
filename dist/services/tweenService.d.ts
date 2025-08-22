@@ -25,11 +25,12 @@ declare class Tween {
 export declare const TweenService: {
     Create: (options: TweenOptions) => Tween;
 };
-export declare const EasingStyles: {
+export interface IEasingStyles {
     linear: (t: number) => number;
     easeInQuad: (t: number) => number;
     easeOutQuad: (t: number) => number;
     easeInOutQuad: (t: number) => number;
-};
+}
+export declare const EasingStyles: IEasingStyles;
 export {};
 //# sourceMappingURL=tweenService.d.ts.map

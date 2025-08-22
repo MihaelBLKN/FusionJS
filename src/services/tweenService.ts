@@ -138,4 +138,11 @@ export const TweenService = {
     },
 };
 
-export const EasingStyles = Easing
+export interface IEasingStyles {
+    linear: (t: number) => number,
+    easeInQuad: (t: number) => number,
+    easeOutQuad: (t: number) => number,
+    easeInOutQuad: (t: number) => number,
+}
+
+export const EasingStyles = Easing as IEasingStyles;

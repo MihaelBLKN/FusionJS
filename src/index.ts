@@ -11,4 +11,5 @@ export { scope } from "./dom/scope";
 export { scoped } from "./dom/scoped";
 export { output } from "./core/output";
 export { contextual } from "./core/contextual";
+export { EasingStyles } from "./services/tweenService";
 export const doNothing = () => { };
