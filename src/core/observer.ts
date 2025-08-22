@@ -9,12 +9,21 @@ import { ValueReturnCallback } from "./value/value"
 import { Scope } from "../dom/scope/scope"
 
 export interface ObserverReturn { onChange: (callback: (newValue: any) => void) => () => void }
-export default (
+export const observer = (
     value: ValueReturnCallback<any>,
     scope: Scope
 ): ObserverReturn => {
     let signalConnection: Connection
     let changedSignal = value.getChangedSignal();
+    const deconstructorsScope = scope.getDeconstructors();
+    const observerDeconstructors = deconstructorsScope.observer;
+
+    observerDeconstructors.set(observerDeconstructors.size + 1, () => {
+        if (signalConnection) {
+            signalConnection.disconnect();
+            signalConnection = undefined as any;
+        }
+    });
 
     return {
         onChange: (callback: (newValue: any) => void): () => void => {

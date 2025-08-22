@@ -4,7 +4,7 @@
 //> MIT License (usage without warranty)
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
-export default (initialValue: any) => {
+export const contextual = (initialValue: any) => {
     const stack: any[] = [];
 
     const getCurrent = () => {

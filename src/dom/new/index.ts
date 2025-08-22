@@ -10,7 +10,7 @@ import { ComputedFactoryCallback, EventCleanupCallbacks } from "./new";
 import remoteRemove from "../../remoteRemove";
 import { ComputedReturn } from "../computed/computed";
 import { Scope } from "../scope/scope";
-import peek from "../../core/peek";
+import { peek } from "../../core/peek";
 
 const processOnEvents = (
     value: Record<string, EventListenerCallback>,

@@ -7,7 +7,7 @@
 import { ValueReturnCallback } from "../value/value";
 import { createUseFactory } from "../../dom/computed";
 import { Scope } from "../../dom/scope/scope";
-import peek from "../peek";
+import { peek } from "../peek";
 
 export type ForPairsCallback = (
     use: any,
@@ -16,7 +16,7 @@ export type ForPairsCallback = (
     value: any
 ) => Promise<[string | number, any]>;
 
-const forPairs = async (
+export const forPairs = async (
     haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>,
     callback: ForPairsCallback,
     scope: Scope
@@ -100,5 +100,3 @@ const forPairs = async (
         }
     }
 };
-
-export default forPairs;

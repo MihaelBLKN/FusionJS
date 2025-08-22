@@ -8,9 +8,9 @@ import { ForKeysCallback } from "./forKeys";
 import { ValueReturnCallback } from "../value/value";
 import { createUseFactory } from "../../dom/computed";
 import { Scope } from "../../dom/scope/scope";
-import peek from "../peek";
+import { peek } from "../peek";
 
-const forKeys = async (
+export const forKeys = async (
     haystack: any[] | Record<string, any> | Map<any, any> | ValueReturnCallback<any>,
     callback: ForKeysCallback,
     scope: Scope
@@ -88,5 +88,3 @@ const forKeys = async (
         }
     }
 }
-
-export default forKeys;

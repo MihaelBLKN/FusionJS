@@ -5,26 +5,25 @@
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
 import { newEl } from "../new";
-import computed from "../computed";
+import { computed } from "../computed";
 import { FunctionMapExport, HTMLAttributes } from "../../global";
 import { ComputedCallback } from "../computed/computed";
-import value from "../../core/value";
-import observer, { ObserverReturn } from "../../core/observer";
+import { value } from "../../core/value";
+import { observer, ObserverReturn } from "../../core/observer";
 import { ValueReturnCallback } from "../../core/value/value";
-import onChange from "../../core/onChange";
+import { onChange } from "../../core/onChange";
 import { onEvent } from "../../core/onEvent";
 import { CallbackOnEvent, EventListenerCallback } from "../../core/onEvent/onEvent";
 import { Scope } from "./scope";
-import forValues from "../../core/forValues";
-import scope from ".";
+import { forValues } from "../../core/forValues";
 import { ForValuesCallback } from "../../core/forValues/forValues";
 import { ForKeysCallback } from "../../core/forKeys/forKeys";
-import forKeys from "../../core/forKeys";
-import forPairs, { ForPairsCallback } from "../../core/forPairs";
-import tween from "../tween";
-import spring, { SpringFactoryOptions } from "../spring";
+import { forKeys } from "../../core/forKeys";
+import { forPairs, ForPairsCallback } from "../../core/forPairs";
+import { tween } from "../tween";
+import { spring, SpringFactoryOptions } from "../spring";
 
-export default (includeMapOrEvents?: { [key: string]: any } | boolean, includeEvents?: boolean): Scope => {
+export const scope = (includeMapOrEvents?: { [key: string]: any } | boolean, includeEvents?: boolean): Scope => {
     const elementDeconstructors = new Map<number, () => void>();
     const valueDeconstructors = new Map<number, () => void>();
     const computedDeconstructors = new Map<number, () => void>();

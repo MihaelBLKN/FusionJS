@@ -5,10 +5,10 @@
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
 import { ValueReturnCallback } from "./value";
-import signal from "../signal";
+import { signal } from "../signal";
 import { Scope } from "../../dom/scope/scope";
 
-export default (initialValue: any, scope: Scope) => {
+export const value = (initialValue: any, scope: Scope) => {
     let currentValue = initialValue;
     let changedSignal = signal();
 

@@ -8,7 +8,7 @@ import { ComputedCallback, ComputedCleanup, ComputedReturn, UseInstruction } fro
 import { Connection } from "../../core/signal/signal";
 import { processProperty } from "../new";
 import remoteRemove from "../../remoteRemove";
-import peek from "../../core/peek";
+import { peek } from "../../core/peek";
 import { ComputedFactoryCallback } from "../new/new";
 import { Scope } from "../scope/scope";
 
@@ -133,7 +133,7 @@ const createComputedFactory = (callback: ComputedCallback<any>, cleanupCallback:
     };
 }
 
-export default (callback: ComputedCallback<any>, cleanupCallback: ComputedCleanup, scope: Scope) => {
+export const computed = (callback: ComputedCallback<any>, cleanupCallback: ComputedCleanup, scope: Scope) => {
     const factory = createComputedFactory(callback, cleanupCallback, scope);
 
     return {

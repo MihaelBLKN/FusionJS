@@ -16,7 +16,7 @@ export function generateRandomSequence(length: number): number[] {
     return sequence;
 }
 
-export default (): Signal<any> => {
+export const signal = (): Signal<any> => {
     const signalId = generateRandomSequence(4)[0];
 
     return {

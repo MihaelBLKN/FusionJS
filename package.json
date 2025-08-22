@@ -1,7 +1,7 @@
 {
   "name": "fusionwebts",
-  "version": "1.0.0",
-  "description": "FusionWebTs is a port of the Fusion roblox UI framework for the world wide web made with TypeScript.",
+  "version": "1.0.0-fix-b-a",
+  "description": "FusionWebTs is a port of the Fusion Roblox UI framework for the web, made with TypeScript.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,14 +14,12 @@
     "FusionJs",
     "FusionTs",
     "FusionWebTs",
-    "FusionWeb",
-    "Fus",
-    "Fusio",
     "Roblox",
-    "Roblox"
+    "UI",
+    "Framework"
   ],
   "author": "MihaelBLKN",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "typescript": "^5.9.2"
   },
@@ -30,10 +28,6 @@
     "url": "https://github.com/MihaelBLKN/FusionWebTs.git"
   },
   "files": [
-    "src",
-    ".gitignore",
-    "package.json",
-    "package-lock.json",
-    "tsconfig.json"
+    "dist"
   ]
 }

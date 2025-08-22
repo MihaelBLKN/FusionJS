@@ -6,7 +6,7 @@
 //> -------------------------------- <//
 import { Scope } from "../dom/scope/scope";
 
-export default (property: string, callback: (newValue: any) => void) => {
+export const onChange = (property: string, callback: (newValue: any) => void) => {
     return (element: HTMLElement, scope: Scope) => {
         let previousValue = (element as any)[property];
         const observers: (() => void)[] = [];

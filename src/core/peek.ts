@@ -6,7 +6,7 @@
 //> -------------------------------- <//
 import { ValueReturnCallback } from "./value/value"
 
-export default (value: ValueReturnCallback<any>) => {
+export const peek = (value: ValueReturnCallback<any>) => {
     // :p
     // ignore private usage
     return value && (value as any)._PRIVATE_DANGEROUS_isState

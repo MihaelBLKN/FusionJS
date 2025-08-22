@@ -7,13 +7,13 @@
 import remoteRemove from "../remoteRemove";
 import { HTMLAttributes } from "../global";
 import { applyProperty } from "./new";
-import scope from "./scope";
+import { scope } from "./scope";
 import { EventCleanupCallbacks } from "./new/new";
 
 const hydrationScope = scope();
 const eventCleanupCallbacks: EventCleanupCallbacks = {};
 const computedCleanupCallbacks: { [key: string]: () => void } = {};
-export default (element: HTMLElement, propertyMap: HTMLAttributes, cleanupCallback?: () => void) => {
+export const hydrate = (element: HTMLElement, propertyMap: HTMLAttributes, cleanupCallback?: () => void) => {
     Object.entries(propertyMap).forEach(([key, value]) => {
         applyProperty(element, key, value, eventCleanupCallbacks, computedCleanupCallbacks, hydrationScope);
     });

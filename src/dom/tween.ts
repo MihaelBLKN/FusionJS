@@ -8,7 +8,7 @@ import { ValueReturnCallback } from "../core/value/value"
 import { FunctionMapExport } from "../global";
 import { TweenService } from "../services/tweenService";
 import { Scope } from "./scope/scope"
-import peek from "../core/peek";
+import { peek } from "../core/peek";
 
 const tweenFactory = (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: any[]) => number, scope: Scope): (property: string) => ValueReturnCallback<any> => {
     return (property: string): ValueReturnCallback<any> => {
@@ -34,7 +34,7 @@ const tweenFactory = (goalValue: ValueReturnCallback<any>, duration: number, eas
     }
 }
 
-export default (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: any[]) => number, scope: Scope): FunctionMapExport => {
+export const tween = (goalValue: ValueReturnCallback<any>, duration: number, easing: (...args: any[]) => number, scope: Scope): FunctionMapExport => {
     const tweenStateValue = tweenFactory(goalValue, duration, easing, scope);
 
     return {

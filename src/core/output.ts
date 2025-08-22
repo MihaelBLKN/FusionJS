@@ -6,7 +6,7 @@
 //> -------------------------------- <//
 import { ValueReturnCallback } from "./value/value"
 import { Connection } from "./signal/signal"
-import scope from "../dom/scope"
+import { scope } from "../dom/scope"
 import { FunctionMapExport } from "../global"
 
 const outputScope = scope()
@@ -37,7 +37,7 @@ const outputFactory = (property: string, value: ValueReturnCallback<any>, change
     }
 }
 
-export default (property: string, value: ValueReturnCallback<any>, changePropertyOnValueChange?: boolean): FunctionMapExport => {
+export const output = (property: string, value: ValueReturnCallback<any>, changePropertyOnValueChange?: boolean): FunctionMapExport => {
     const factory = outputFactory(property, value, changePropertyOnValueChange);
 
     return {
