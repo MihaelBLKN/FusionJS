@@ -1,1 +1,0 @@
-{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../src/core/peek/index.ts"],"names":[],"mappings":"AAAA,YAAY,CAAA;AAQZ,MAAM,CAAC,MAAM,IAAI,GAAG,CAAC,KAA+B,EAAO,EAAE;IACzD,KAAK;IACL,uBAAuB;IACvB,OAAO,KAAK,IAAK,KAAa,CAAC,0BAA0B;QACrD,CAAC,CAAE,KAAa,CAAC,sBAAsB,EAAE;QACzC,CAAC,CAAC,KAAK,CAAC;AAChB,CAAC,CAAA"}

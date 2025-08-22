@@ -1,6 +1,6 @@
 "use strict";
-import { TweenService } from "../services/tweenService";
 import { peek } from "../core/peek";
+import { TweenService } from "../services/tweenService";
 const tweenFactory = (goalValue, duration, easing, scope) => {
     return (property) => {
         const progressValue = scope.value(undefined);

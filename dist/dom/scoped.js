@@ -8,10 +8,10 @@ import { scope } from "./scope";
 const globalScope = scope(true);
 export const scoped = (map) => {
     map && Object.entries(map).forEach(([key, value]) => {
-        if (globalScope.has(key)) {
+        if (Object.prototype.hasOwnProperty.call(globalScope, key)) {
             throw new Error(`Key "${key}" already exists in globalScope.`);
         }
-        globalScope.set(key, value);
+        globalScope[key] = value;
     });
     return globalScope;
 };

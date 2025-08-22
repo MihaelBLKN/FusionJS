@@ -14,7 +14,7 @@ export const observer = (value, scope) => {
         onChange: (callback) => {
             if (!signalConnection && changedSignal) {
                 const connectionPromise = changedSignal.connect(callback);
-                connectionPromise.then(connection => {
+                connectionPromise.then((connection) => {
                     signalConnection = connection;
                 });
             }

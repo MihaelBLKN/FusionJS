@@ -1,4 +1,9 @@
 "use strict";
+//> -------------------------------- <//
+//> MihaelBLKN 2025-2026
+//> MIT License (usage without warranty)
+//> https://opensource.org/licenses/MIT
+//> -------------------------------- <//
 export { signal } from "./core/signal";
 export { peek } from "./core/peek";
 export { hydrate } from "./dom/hydrate";
