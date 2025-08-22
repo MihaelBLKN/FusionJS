@@ -1,21 +1,18 @@
-"use strict"
+"use strict";
 //> -------------------------------- <//
 //> MihaelBLKN 2025-2026
 //> MIT License (usage without warranty)
 //> https://opensource.org/licenses/MIT
 //> -------------------------------- <//
 import { scope } from "../scope";
-import { Scope } from "../scope/scope";
-
 const globalScope = scope(true);
-export const scoped = (map?: { [key: string]: any }): Scope => {
+export const scoped = (map) => {
     map && Object.entries(map).forEach(([key, value]) => {
         if (Object.prototype.hasOwnProperty.call(globalScope, key)) {
             throw new Error(`Key "${key}" already exists in globalScope.`);
         }
-
-        (globalScope as any)[key] = value;
+        globalScope[key] = value;
     });
-
-    return globalScope
-}
+    return globalScope;
+};
+//# sourceMappingURL=index.js.map

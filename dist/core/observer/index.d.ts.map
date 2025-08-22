@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/core/observer/index.ts"],"names":[],"mappings":"AAOA,OAAO,EAAE,mBAAmB,EAAE,MAAM,gBAAgB,CAAA;AACpD,OAAO,EAAE,KAAK,EAAE,MAAM,uBAAuB,CAAA;AAC7C,OAAO,EAAE,cAAc,EAAE,MAAM,YAAY,CAAA;AAE3C,eAAO,MAAM,QAAQ,GACjB,OAAO,mBAAmB,CAAC,GAAG,CAAC,EAC/B,OAAO,KAAK,KACb,cA8BF,CAAA"}
