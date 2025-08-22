@@ -7,5 +7,5 @@ export interface SpringFactoryOptions {
     mass?: number;
 }
 export declare const spring: (goalValue: ValueReturnCallback<any>, scope: Scope, options?: SpringFactoryOptions) => FunctionMapExport;
-export type Spring<T = any> = (goalValue: ValueReturnCallback<T>, scope: Scope, options?: SpringFactoryOptions) => FunctionMapExport;
+export type Spring<T = any> = (goalValue: ValueReturnCallback<T>, scope?: Scope, options?: SpringFactoryOptions) => FunctionMapExport;
 //# sourceMappingURL=spring.d.ts.map

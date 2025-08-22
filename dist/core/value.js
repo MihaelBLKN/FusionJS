@@ -8,8 +8,8 @@ import { signal } from "./signal";
 export const value = (initialValue, scope) => {
     let currentValue = initialValue;
     let changedSignal = signal();
-    const deconstructorsScope = scope.getDeconstructors();
-    deconstructorsScope.value.set(deconstructorsScope.value.size + 1, () => {
+    const deconstructorsScope = scope === null || scope === void 0 ? void 0 : scope.getDeconstructors();
+    deconstructorsScope === null || deconstructorsScope === void 0 ? void 0 : deconstructorsScope.value.set(deconstructorsScope.value.size + 1, () => {
         changedSignal = undefined;
         changedSignal.disconnectAll();
     });

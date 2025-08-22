@@ -23,5 +23,5 @@ export interface ComputedReturn {
     __callback: () => any;
     setOnUpdateCallback: (callback: (newValue: any) => void) => void;
 }
-export type Computed<T = any> = (callback: ComputedCallback<T>, cleanupCallback: ComputedCleanup, scope: Scope) => FunctionMapExport;
+export type Computed<T = any> = (callback: ComputedCallback<T>, cleanupCallback: ComputedCleanup, scope?: Scope) => FunctionMapExport;
 //# sourceMappingURL=computed.d.ts.map

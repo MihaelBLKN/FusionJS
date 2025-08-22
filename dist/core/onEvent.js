@@ -7,7 +7,7 @@ export const onEvent = (eventName, callback) => {
         const cleanupFunc = () => {
             element.removeEventListener(eventName, () => { });
         };
-        scope.getDeconstructors().onEvent.set(scope.getDeconstructors().onEvent.size + 1, cleanupFunc);
+        scope === null || scope === void 0 ? void 0 : scope.getDeconstructors().onEvent.set((scope === null || scope === void 0 ? void 0 : scope.getDeconstructors().onEvent.size) + 1, cleanupFunc);
         return cleanupFunc;
     };
 };
