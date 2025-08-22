@@ -27,6 +27,12 @@ const processOnEvents = (
     });
 };
 
+const toKebabCase = (prop: string): string => {
+    if (prop.startsWith('--')) return prop;
+    const kebab = prop.replace(/([A-Z])/g, '-$1').toLowerCase();
+    return kebab.startsWith('-') ? kebab : kebab;
+}
+
 const processParent = (value: HTMLElement | null, newElement: HTMLElement, ctx: { eventCleanupCallbacks: EventCleanupCallbacks, computedCleanupCallbacks: { [key: string]: () => void } }, scope: Scope) => {
     if ((value as any).getSignature) {
         const signature = (value as any).getSignature();
@@ -118,6 +124,7 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
                 }
 
                 if (!signature) {
+                    processStyleValue(prop, val, element);
                     return;
                 }
 
@@ -146,63 +153,40 @@ export const propertyHandlers: Record<string, PropertyHandler> = {
             if (
                 val &&
                 typeof val === "object" &&
-                (
-                    "r" in val ||
-                    "g" in val ||
-                    "b" in val ||
-                    "red" in val ||
-                    "green" in val ||
-                    "blue" in val
-                )
+                ("r" in val || "g" in val || "b" in val ||
+                    "red" in val || "green" in val || "blue" in val)
             ) {
-                const colorVal = val as { r?: number; g?: number; b?: number; red?: number; green?: number; blue?: number; alpha?: number };
-                const r = colorVal.r ?? colorVal.red ?? 0;
-                const g = colorVal.g ?? colorVal.green ?? 0;
-                const b = colorVal.b ?? colorVal.blue ?? 0;
-                const a = colorVal.alpha ?? 1;
+                const { r, g, b, red, green, blue, alpha = 1 } = val as any;
+                const rgb = `${r ?? red ?? 0},${g ?? green ?? 0},${b ?? blue ?? 0}`;
+                const colorString = alpha !== 1 ? `rgba(${rgb},${alpha})` : `rgb(${rgb})`;
 
-                const colorString = a !== 1
-                    ? `rgba(${r},${g},${b},${a})`
-                    : `rgb(${r},${g},${b})`;
-
-                element.style.setProperty(prop, colorString);
-
-                if (prop === 'backgroundColor') {
-                    element.style.setProperty('background-color', colorString);
-                }
+                element.style.setProperty(toKebabCase(prop), colorString);
+                return;
             }
-            else if (
-                val &&
-                typeof val === "object" &&
-                "hex" in val
-            ) {
-                const hex = val.hex;
-                const a = (val as { alpha?: number }).alpha;
+
+            if (val && typeof val === "object" && "hex" in val) {
+                const { hex, alpha } = val as { hex: string; alpha?: number };
                 let finalValue: string;
 
-                if (typeof a === "number" && a >= 0 && a < 1) {
-                    let hexValue = (hex as string).replace(/^#/, "");
-                    if (hexValue.length === 3) {
-                        hexValue = hexValue.split("").map(x => x + x).join("");
+                if (typeof alpha === "number" && alpha >= 0 && alpha < 1) {
+                    let cleanHex = hex.replace(/^#/, "");
+                    if (cleanHex.length === 3) {
+                        cleanHex = cleanHex.split("").map(c => c + c).join("");
                     }
-                    const num = parseInt(hexValue, 16);
+                    const num = parseInt(cleanHex, 16);
                     const r = (num >> 16) & 255;
                     const g = (num >> 8) & 255;
                     const b = num & 255;
-                    finalValue = `rgba(${r},${g},${b},${a})`;
+                    finalValue = `rgba(${r},${g},${b},${alpha})`;
                 } else {
-                    finalValue = hex as string;
+                    finalValue = hex;
                 }
 
-                element.style.setProperty(prop, finalValue);
+                element.style.setProperty(toKebabCase(prop), finalValue);
+                return;
+            }
 
-                if (prop === 'backgroundColor') {
-                    element.style.setProperty('background-color', finalValue);
-                }
-            }
-            else {
-                element.style.setProperty(prop, val as string);
-            }
+            element.style.setProperty(toKebabCase(prop), String(val));
         }
     },
     default: (key, value, element) => {

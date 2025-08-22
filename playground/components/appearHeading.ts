@@ -15,7 +15,7 @@ export default (scope: Scope, props: Props): HTMLElement => {
             // nor a fully replicated TweenService api
 
             color: {
-                hex: "#000000ff",
+                hex: "#ffffffff",
             },
 
             fontFamily: '"Sono", monospace'
